@@ -1,21 +1,21 @@
+use std::path::PathBuf;
+
 use clang::Clang;
-use std::env;
+use clap::Parser;
 
 use crate::backends::{Backend, CHeader};
 
 mod backends;
 mod source;
 
+#[derive(Parser)]
+#[command(version, about)]
+struct Args {
+    path: Vec<PathBuf>,
+}
+
 fn main() {
-    let mut args = env::args();
-
-    args.next();
-
-    if args.len() < 1 {
-        eprintln!("Error: no path given");
-
-        return;
-    }
+    let args = Args::parse();
 
     let clang = Clang::new();
 
@@ -27,28 +27,37 @@ fn main() {
 
     let clang = clang.unwrap();
 
-    if let Err(error) = args.try_for_each(|path| process_file(&clang, path)) {
+    if let Err(error) = args
+        .path
+        .into_iter()
+        .try_for_each(|path| process_file(&clang, path))
+    {
         eprintln!("{}", error);
     }
 }
 
 fn process_file(
     clang: &Clang,
-    path: String,
+    path: PathBuf,
 ) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     let index = clang::Index::new(clang, false, false);
 
     let parser = index.parser(&path).parse();
 
     if let Err(error) = parser {
-        return Err(format!("Error: failed to parse file {}: {}", path, error).into());
+        return Err(format!(
+            "Error: failed to parse file {}: {}",
+            path.to_str().unwrap_or(""),
+            error
+        )
+        .into());
     }
 
     let parser = parser.unwrap();
 
     let ranges = source::ranges_from_ast(&parser).ok_or(format!(
         "Error: failed to get source ranges from file {}",
-        path
+        path.to_str().unwrap_or("")
     ))?;
 
     let header = CHeader::new(&path);

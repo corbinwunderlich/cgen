@@ -10,19 +10,19 @@ use twox_hash::XxHash3_128;
 const HEADER_EXTENSION: &str = "h";
 
 pub struct CHeader {
-    source_path: String,
+    source_path: PathBuf,
     generated_path: PathBuf,
 }
 
 impl crate::backends::Backend for CHeader {
-    fn new(source_path: &str) -> Self {
+    fn new(source_path: &PathBuf) -> Self {
         Self {
             source_path: source_path.to_owned(),
             generated_path: Path::new(source_path).with_extension(HEADER_EXTENSION),
         }
     }
 
-    fn source_path(&self) -> &str {
+    fn source_path(&self) -> &PathBuf {
         &self.source_path
     }
 
