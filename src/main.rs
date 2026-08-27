@@ -1,6 +1,7 @@
 use clap_verbosity_flag::{InfoLevel, Verbosity};
 use log::error;
 use std::path::PathBuf;
+use walkdir::WalkDir;
 
 use clang::Clang;
 use clap::Parser;
@@ -13,7 +14,8 @@ mod source;
 #[derive(Parser)]
 #[command(version, about)]
 struct Args {
-    /// File to transform
+    /// Files or directories to transform
+    #[arg(required = true)]
     path: Vec<PathBuf>,
     #[command(flatten)]
     verbosity: Verbosity<InfoLevel>,
@@ -49,6 +51,23 @@ fn process_file(
     clang: &Clang,
     path: PathBuf,
 ) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
+    if path.is_dir() {
+        for file in WalkDir::new(&path)
+            .into_iter()
+            .filter_map(|e| e.ok())
+            .filter(|e| e.file_type().is_file())
+            .map(|e| e.into_path())
+            .filter(|e| {
+                e.extension()
+                    .is_some_and(|f| matches!(f.to_str(), Some("c") | Some("cpp")))
+            })
+        {
+            process_file(clang, file)?;
+        }
+
+        return Ok(());
+    }
+
     let index = clang::Index::new(clang, false, false);
 
     let parser = index.parser(&path).parse();
