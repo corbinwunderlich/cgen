@@ -1,11 +1,14 @@
 mod c_header;
 
-use std::{fs, path::PathBuf};
+use std::{
+    fs,
+    path::{Path, PathBuf},
+};
 
 pub use c_header::CHeader;
 
 pub trait Backend {
-    fn new(source_path: &PathBuf) -> Self;
+    fn new(source_path: &Path) -> Self;
 
     fn source_path(&self) -> &PathBuf;
     fn out_path(&self) -> &PathBuf;

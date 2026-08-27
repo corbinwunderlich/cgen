@@ -15,10 +15,10 @@ pub struct CHeader {
 }
 
 impl crate::backends::Backend for CHeader {
-    fn new(source_path: &PathBuf) -> Self {
+    fn new(source_path: &Path) -> Self {
         Self {
             source_path: source_path.to_owned(),
-            generated_path: Path::new(source_path).with_extension(HEADER_EXTENSION),
+            generated_path: source_path.with_extension(HEADER_EXTENSION),
         }
     }
 
