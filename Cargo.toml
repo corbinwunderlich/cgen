@@ -1,0 +1,8 @@
+[package]
+name = "cgen"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+clang = "2.1.0"
+twox-hash = "2.1.4"

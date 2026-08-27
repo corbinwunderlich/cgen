@@ -25,6 +25,7 @@
 
       perSystem = {
         pkgs,
+        lib,
         config,
         ...
       }: {
@@ -35,9 +36,11 @@
         };
 
         devShells.default = pkgs.mkShell {
-          packages = with pkgs; [cargo] ++ config.pre-commit.settings.enabledPackages;
+          packages = with pkgs; [cargo libclang] ++ config.pre-commit.settings.enabledPackages;
 
           inherit (config.pre-commit) shellHook;
+
+          LIBCLANG_PATH = lib.makeLibraryPath (with pkgs; [libclang]);
         };
       };
     };
