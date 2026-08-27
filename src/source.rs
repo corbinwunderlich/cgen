@@ -39,7 +39,7 @@ fn get_source_range_from_node<'a>(
 
     let range = start.offset..end.offset + 1;
 
-    if overlapping_ranges.len() == 0 {
+    if overlapping_ranges.is_empty() {
         ranges.push(SourceRange(range, node));
 
         return Some(ranges);

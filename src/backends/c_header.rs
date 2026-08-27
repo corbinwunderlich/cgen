@@ -42,7 +42,7 @@ impl crate::backends::Backend for CHeader {
 
                 let source = file_content.get(range.0.start as usize..range.0.end as usize);
 
-                if let None = source {
+                if source.is_none() {
                     return accumulator;
                 }
 
@@ -69,7 +69,7 @@ impl CHeader {
     fn delete_function_body(source: &mut String) {
         let opening_brace = source.find('{');
 
-        let closing_brace = source.rfind('}').and_then(|pos| {
+        let closing_brace = source.rfind('}').map(|pos| {
             let remaining = &source[pos + 1..];
 
             let mut i = 0usize;
@@ -81,11 +81,11 @@ impl CHeader {
                 i += 1;
             }
 
-            Some(pos + i)
+            pos + i
         });
 
         if opening_brace.is_none() || closing_brace.is_none() {
-            return ();
+            return;
         }
 
         source.replace_range(opening_brace.unwrap()..closing_brace.unwrap() + 1, "");
@@ -93,7 +93,7 @@ impl CHeader {
 
     fn restore_semicolons(source: &mut String) {
         if let trimmed = source.trim_end()
-            && trimmed.chars().last() != Some(';')
+            && !trimmed.ends_with(';')
         {
             *source = trimmed.to_owned() + ";";
         }
@@ -104,7 +104,7 @@ impl CHeader {
     fn add_header_boilerplate(content: String) -> String {
         let hash = XxHash3_128::oneshot(content.as_bytes());
 
-        return formatdoc! {"
+        formatdoc! {"
             // clang-format off
             // NOLINTBEGIN
 
@@ -119,6 +119,6 @@ impl CHeader {
 
             // clang-format on
             // NOLINTEND
-        ", content, hash};
+        ", content, hash}
     }
 }

@@ -34,6 +34,13 @@
             alejandra.enable = true;
 
             rustfmt.enable = true;
+
+            clippy = {
+              enable = true;
+              settings = {
+                extraArgs = "--fix --allow-dirty";
+              };
+            };
           };
         };
 

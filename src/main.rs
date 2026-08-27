@@ -13,7 +13,8 @@ fn main() {
 
     if args.len() < 1 {
         eprintln!("Error: no path given");
-        ()
+
+        return;
     }
 
     let clang = Clang::new();
@@ -21,13 +22,13 @@ fn main() {
     if let Err(error) = clang {
         eprintln!("Error: failed to initialize Libclang: {}", error);
 
-        return ();
+        return;
     }
 
     let clang = clang.unwrap();
 
     if let Err(error) = args.try_for_each(|path| process_file(&clang, path)) {
-        eprintln!("{}", error.to_string());
+        eprintln!("{}", error);
     }
 }
 
@@ -40,12 +41,7 @@ fn process_file(
     let parser = index.parser(&path).parse();
 
     if let Err(error) = parser {
-        return Err(format!(
-            "Error: failed to parse file {}: {}",
-            path,
-            error.to_string()
-        )
-        .into());
+        return Err(format!("Error: failed to parse file {}: {}", path, error).into());
     }
 
     let parser = parser.unwrap();
