@@ -27,8 +27,24 @@
         pkgs,
         lib,
         config,
+        self',
         ...
       }: {
+        packages = {
+          cgen = pkgs.rustPlatform.buildRustPackage {
+            pname = "cgen";
+            version = "0.1.0";
+
+            src = ./.;
+
+            cargoLock.lockFile = ./Cargo.lock;
+
+            LIBCLANG_PATH = lib.makeLibraryPath (with pkgs; [libclang]);
+          };
+
+          default = self'.packages.cgen;
+        };
+
         pre-commit.settings = {
           hooks = {
             alejandra.enable = true;
@@ -49,7 +65,7 @@
 
           inherit (config.pre-commit) shellHook;
 
-          LIBCLANG_PATH = lib.makeLibraryPath (with pkgs; [libclang]);
+          inherit (self'.packages.cgen) LIBCLANG_PATH;
         };
       };
     };
