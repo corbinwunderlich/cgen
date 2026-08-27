@@ -16,16 +16,22 @@ pub trait Backend {
         if let Err(error) = fs::write(
             self.out_path(),
             content.into().ok_or(format!(
-                "Error: failed to generate file contents for source file {}",
+                "failed to generate file contents for source file {}",
                 self.source_path().to_str().unwrap_or("")
             ))?,
         ) {
             return Err(format!(
-                "Error: failed to write generated file for source file {}, {}",
+                "failed to write generated file for source file {}, {}",
                 self.source_path().to_str().unwrap_or(""),
                 error
             ));
         }
+
+        println!(
+            "Wrote generated file {} from source file {}",
+            self.out_path().to_str().unwrap_or(""),
+            self.source_path().to_str().unwrap_or("")
+        );
 
         Ok(())
     }

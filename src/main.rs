@@ -32,7 +32,7 @@ fn main() {
         .into_iter()
         .try_for_each(|path| process_file(&clang, path))
     {
-        eprintln!("{}", error);
+        eprintln!("Error: {}", error);
     }
 }
 
@@ -46,7 +46,7 @@ fn process_file(
 
     if let Err(error) = parser {
         return Err(format!(
-            "Error: failed to parse file {}: {}",
+            "failed to parse file {}: {}",
             path.to_str().unwrap_or(""),
             error
         )
@@ -56,7 +56,7 @@ fn process_file(
     let parser = parser.unwrap();
 
     let ranges = source::ranges_from_ast(&parser).ok_or(format!(
-        "Error: failed to get source ranges from file {}",
+        "failed to get source ranges from file {}",
         path.to_str().unwrap_or("")
     ))?;
 
