@@ -49,6 +49,8 @@
           hooks = {
             alejandra.enable = true;
 
+            mdformat.enable = true;
+
             rustfmt.enable = true;
 
             clippy = {
