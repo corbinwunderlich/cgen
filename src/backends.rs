@@ -5,6 +5,8 @@ use std::{
     path::{Path, PathBuf},
 };
 
+use log::info;
+
 pub use c_header::CHeader;
 
 pub trait Backend {
@@ -30,8 +32,8 @@ pub trait Backend {
             ));
         }
 
-        println!(
-            "Wrote generated file {} from source file {}",
+        info!(
+            "wrote generated file {} from source file {}",
             self.out_path().to_str().unwrap_or(""),
             self.source_path().to_str().unwrap_or("")
         );

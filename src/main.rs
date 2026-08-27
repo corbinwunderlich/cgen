@@ -1,3 +1,5 @@
+use clap_verbosity_flag::{InfoLevel, Verbosity};
+use log::error;
 use std::path::PathBuf;
 
 use clang::Clang;
@@ -11,16 +13,23 @@ mod source;
 #[derive(Parser)]
 #[command(version, about)]
 struct Args {
+    /// File to transform
     path: Vec<PathBuf>,
+    #[command(flatten)]
+    verbosity: Verbosity<InfoLevel>,
 }
 
 fn main() {
     let args = Args::parse();
 
+    colog::default_builder()
+        .filter_level(args.verbosity.into())
+        .init();
+
     let clang = Clang::new();
 
     if let Err(error) = clang {
-        eprintln!("Error: failed to initialize Libclang: {}", error);
+        error!("failed to initialize Libclang: {}", error);
 
         return;
     }
@@ -32,7 +41,7 @@ fn main() {
         .into_iter()
         .try_for_each(|path| process_file(&clang, path))
     {
-        eprintln!("Error: {}", error);
+        error!("{}", error);
     }
 }
 
