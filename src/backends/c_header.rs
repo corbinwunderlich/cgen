@@ -1,4 +1,7 @@
-use std::{fs, path::{Path, PathBuf}};
+use std::{
+    fs,
+    path::{Path, PathBuf},
+};
 
 use clang::EntityKind;
 use indoc::formatdoc;
@@ -8,14 +11,14 @@ const HEADER_EXTENSION: &str = "h";
 
 pub struct CHeader {
     source_path: String,
-    generated_path: PathBuf
+    generated_path: PathBuf,
 }
 
 impl crate::backends::Backend for CHeader {
     fn new(source_path: &str) -> Self {
         Self {
             source_path: source_path.to_owned(),
-            generated_path: Path::new(source_path).with_extension(HEADER_EXTENSION)
+            generated_path: Path::new(source_path).with_extension(HEADER_EXTENSION),
         }
     }
 
@@ -30,29 +33,33 @@ impl crate::backends::Backend for CHeader {
     fn generate_content(&self, ranges: Vec<crate::source::SourceRange>) -> Option<String> {
         let file_content = fs::read_to_string(&self.source_path).ok()?;
 
-        let result = ranges.into_iter().fold(String::new(), |mut accumulator, range| {
-            if let Some(comment) = range.1.get_comment() {
-                accumulator.push_str(&(comment + "\n"));
-            }
+        let result = ranges
+            .into_iter()
+            .fold(String::new(), |mut accumulator, range| {
+                if let Some(comment) = range.1.get_comment() {
+                    accumulator.push_str(&(comment + "\n"));
+                }
 
-            let source = file_content.get(range.0.start as usize..range.0.end as usize);
+                let source = file_content.get(range.0.start as usize..range.0.end as usize);
 
-            if let None = source {
-                return accumulator;
-            }
+                if let None = source {
+                    return accumulator;
+                }
 
-            let mut source = source.unwrap().to_owned();
+                let mut source = source.unwrap().to_owned();
 
-            if range.1.get_kind() == EntityKind::FunctionDecl {
-                Self::delete_function_body(&mut source);
-            }
+                if range.1.get_kind() == EntityKind::FunctionDecl {
+                    Self::delete_function_body(&mut source);
+                }
 
-            accumulator.push_str(&source);
+                accumulator.push_str(&source);
 
-            Self::restore_semicolons(&mut accumulator);
+                Self::restore_semicolons(&mut accumulator);
 
-            accumulator
-        }).trim().to_owned();
+                accumulator
+            })
+            .trim()
+            .to_owned();
 
         Some(Self::add_header_boilerplate(result))
     }
@@ -85,7 +92,9 @@ impl CHeader {
     }
 
     fn restore_semicolons(source: &mut String) {
-        if let trimmed = source.trim_end() && trimmed.chars().last() != Some(';') {
+        if let trimmed = source.trim_end()
+            && trimmed.chars().last() != Some(';')
+        {
             *source = trimmed.to_owned() + ";";
         }
 

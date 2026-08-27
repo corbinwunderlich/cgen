@@ -10,15 +10,17 @@ impl<'a> SourceRange<'a> {
 }
 
 pub fn ranges_from_ast<'tu>(tu: &'tu clang::TranslationUnit<'tu>) -> Option<Vec<SourceRange<'tu>>> {
-    tu
-        .get_entity()
+    tu.get_entity()
         .get_children()
         .into_iter()
         .filter(|node| node.get_linkage() != Some(clang::Linkage::Internal))
         .try_fold(Vec::new(), get_source_range_from_node)
 }
 
-fn get_source_range_from_node<'a>(mut ranges: Vec<SourceRange<'a>>, node: clang::Entity<'a>) -> Option<Vec<SourceRange<'a>>> {
+fn get_source_range_from_node<'a>(
+    mut ranges: Vec<SourceRange<'a>>,
+    node: clang::Entity<'a>,
+) -> Option<Vec<SourceRange<'a>>> {
     let range = node.get_range()?;
 
     let start = range.get_start().get_file_location();
@@ -48,7 +50,7 @@ fn get_source_range_from_node<'a>(mut ranges: Vec<SourceRange<'a>>, node: clang:
 
         r.len() < range_length
     }) {
-        return Some(ranges)
+        return Some(ranges);
     }
 
     let overlapping_ranges: collections::HashSet<usize> = overlapping_ranges

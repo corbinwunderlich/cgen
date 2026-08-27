@@ -1,10 +1,10 @@
-use std::env;
 use clang::Clang;
+use std::env;
 
 use crate::backends::{Backend, CHeader};
 
-mod source;
 mod backends;
+mod source;
 
 fn main() {
     let mut args = env::args();
@@ -31,19 +31,29 @@ fn main() {
     }
 }
 
-fn process_file(clang: &Clang, path: String) -> Result<(), Box<dyn std::error::Error + Send + Sync>>{
+fn process_file(
+    clang: &Clang,
+    path: String,
+) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     let index = clang::Index::new(clang, false, false);
 
     let parser = index.parser(&path).parse();
 
     if let Err(error) = parser {
-        return Err(format!("Error: failed to parse file {}: {}", path, error.to_string()).into())
+        return Err(format!(
+            "Error: failed to parse file {}: {}",
+            path,
+            error.to_string()
+        )
+        .into());
     }
 
     let parser = parser.unwrap();
 
-    let ranges = source::ranges_from_ast(&parser)
-        .ok_or(format!("Error: failed to get source ranges from file {}", path))?;
+    let ranges = source::ranges_from_ast(&parser).ok_or(format!(
+        "Error: failed to get source ranges from file {}",
+        path
+    ))?;
 
     let header = CHeader::new(&path);
 

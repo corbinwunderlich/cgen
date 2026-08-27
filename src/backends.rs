@@ -15,9 +15,16 @@ pub trait Backend {
     fn write(&self, content: impl Into<Option<String>>) -> Result<(), String> {
         if let Err(error) = fs::write(
             self.out_path(),
-            content.into().ok_or(format!("Error: failed to generate file contents for source file {}", self.source_path()))?
-        )  {
-            return Err(format!("Error: failed to write generated file for source file {}, {}", self.source_path(), error));
+            content.into().ok_or(format!(
+                "Error: failed to generate file contents for source file {}",
+                self.source_path()
+            ))?,
+        ) {
+            return Err(format!(
+                "Error: failed to write generated file for source file {}, {}",
+                self.source_path(),
+                error
+            ));
         }
 
         Ok(())

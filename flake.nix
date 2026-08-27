@@ -32,6 +32,8 @@
         pre-commit.settings = {
           hooks = {
             alejandra.enable = true;
+
+            rustfmt.enable = true;
           };
         };
 
