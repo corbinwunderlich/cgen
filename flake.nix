@@ -31,25 +31,28 @@
         ...
       }: {
         packages = {
-          cgen = pkgs.rustPlatform.buildRustPackage {
-            pname = "cgen";
-            version = "0.1.0";
+          cgen = let
+            cargo-toml = fromTOML (builtins.readFile ./Cargo.toml);
+          in
+            pkgs.rustPlatform.buildRustPackage {
+              pname = cargo-toml.package.name;
+              version = cargo-toml.package.version;
 
-            src = ./.;
+              src = ./.;
 
-            nativeBuildInputs = with pkgs; [installShellFiles];
+              nativeBuildInputs = with pkgs; [installShellFiles];
 
-            cargoLock.lockFile = ./Cargo.lock;
+              cargoLock.lockFile = ./Cargo.lock;
 
-            LIBCLANG_PATH = lib.makeLibraryPath (with pkgs; [libclang]);
+              LIBCLANG_PATH = lib.makeLibraryPath (with pkgs; [libclang]);
 
-            postInstall = ''
-              installManPage target/man/cgen.1
+              postInstall = ''
+                installManPage target/man/cgen.1
 
-              installShellCompletion target/completions/cgen.{bash,fish,nu}
-              installShellCompletion --zsh target/completions/_cgen
-            '';
-          };
+                installShellCompletion target/completions/cgen.{bash,fish,nu}
+                installShellCompletion --zsh target/completions/_cgen
+              '';
+            };
 
           default = self'.packages.cgen;
         };
