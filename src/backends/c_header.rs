@@ -5,14 +5,17 @@ use std::{
 
 use clang::EntityKind;
 use indoc::formatdoc;
+use schemars::JsonSchema;
 use serde::Deserialize;
 use smart_default::SmartDefault;
 use twox_hash::XxHash3_128;
 
-#[derive(Debug, Deserialize, SmartDefault)]
+#[derive(Debug, Deserialize, JsonSchema, SmartDefault)]
 #[serde(default)]
 pub struct Config {
     #[default("h")]
+    #[schemars(example = &"hpp", example = &"h")]
+    /// The output extension for the header files
     extension: String,
 }
 

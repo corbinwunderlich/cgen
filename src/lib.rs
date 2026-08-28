@@ -7,10 +7,10 @@ use walkdir::WalkDir;
 
 use crate::backends::{Backend, CHeader};
 
-mod backends;
-mod cfg;
-mod cli;
-mod source;
+pub mod backends;
+pub mod cfg;
+pub mod cli;
+pub mod source;
 
 #[derive(Debug, Error, Diagnostic)]
 #[error("Failed to generate code from source {path}")]

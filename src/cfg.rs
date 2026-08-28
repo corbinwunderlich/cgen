@@ -2,6 +2,7 @@ use std::sync::OnceLock;
 
 use config::{Config, ConfigError};
 use miette::Diagnostic;
+use schemars::JsonSchema;
 use serde::Deserialize;
 use smart_default::SmartDefault;
 use thiserror::Error;
@@ -14,7 +15,7 @@ pub struct Error {
     pub source: ConfigError,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, JsonSchema)]
 pub struct Settings {
     #[serde(default)]
     pub inputs: InputsConfig,
@@ -22,23 +23,25 @@ pub struct Settings {
     pub outputs: OutputsConfig,
 }
 
-#[derive(Debug, Deserialize, SmartDefault)]
+#[derive(Debug, Deserialize, JsonSchema, SmartDefault)]
 #[serde(default)]
 pub struct InputsConfig {
     #[default(vec!["c".into(), "cpp".into()])]
+    /// The extensions which are allowed to be transformed
     pub extensions: Vec<String>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, JsonSchema)]
 #[serde(rename_all = "snake_case")]
 pub enum OutputKind {
     CHeader,
 }
 
-#[derive(Debug, Deserialize, SmartDefault)]
+#[derive(Debug, Deserialize, JsonSchema, SmartDefault)]
 #[serde(default)]
 pub struct OutputsConfig {
     #[default(vec![OutputKind::CHeader])]
+    /// The outputs to enable
     pub enable: Vec<OutputKind>,
     pub c_header: crate::backends::c_header::Config,
 }

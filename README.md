@@ -10,6 +10,33 @@ The recommended installation is with Nix. Add it as an input to your devshells, 
 nix profile add github:corbinwunderlich/cgen
 ```
 
+# Configuration
+
+cgen can be configured through a cgen configuration file, located in the current working directory. It can be YAML, JSON, TOML, or any of the config types that [config-rs](https://crates.io/crates/config) supports.
+
+> [!TIP]
+> It is recommended to add the following (depending on your file format) to your config for LSP documentation:
+>
+> JSON:
+>
+> ```json
+> {
+>     "$schema": "https://raw.githubusercontent.com/corbinwunderlich/cgen/main/cgen_config.json"
+> }
+> ```
+>
+> YAML:
+>
+> ```yaml
+> # yaml-language-server: $schema=https://raw.githubusercontent.com/corbinwunderlich/cgen/main/cgen_config.json
+> ```
+>
+> TOML:
+>
+> ```toml
+> #:schema https://raw.githubusercontent.com/corbinwunderlich/cgen/main/cgen_config.json
+> ```
+
 # Planned
 
 - Bindings generation

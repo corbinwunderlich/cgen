@@ -1,0 +1,66 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Settings",
+  "type": "object",
+  "properties": {
+    "inputs": {
+      "$ref": "#/$defs/InputsConfig"
+    },
+    "outputs": {
+      "$ref": "#/$defs/OutputsConfig"
+    }
+  },
+  "$defs": {
+    "Config": {
+      "type": "object",
+      "properties": {
+        "extension": {
+          "description": "The output extension for the header files",
+          "type": "string",
+          "default": "h",
+          "examples": [
+            "hpp",
+            "h"
+          ]
+        }
+      }
+    },
+    "InputsConfig": {
+      "type": "object",
+      "properties": {
+        "extensions": {
+          "description": "The extensions which are allowed to be transformed",
+          "type": "array",
+          "default": [
+            "c",
+            "cpp"
+          ],
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "OutputKind": {
+      "type": "string",
+      "enum": [
+        "c_header"
+      ]
+    },
+    "OutputsConfig": {
+      "type": "object",
+      "properties": {
+        "c_header": {
+          "$ref": "#/$defs/Config"
+        },
+        "enable": {
+          "description": "The outputs to enable",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/OutputKind"
+          }
+        }
+      }
+    }
+  }
+}
