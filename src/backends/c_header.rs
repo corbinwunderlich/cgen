@@ -22,10 +22,6 @@ impl crate::backends::Backend for CHeader {
         }
     }
 
-    fn source_path(&self) -> &PathBuf {
-        &self.source_path
-    }
-
     fn out_path(&self) -> &PathBuf {
         &self.generated_path
     }

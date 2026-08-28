@@ -1,7 +1,7 @@
 use clang::Clang;
 use clap::Parser;
-use log::error;
-use std::path::PathBuf;
+use miette::{Diagnostic, Report};
+use std::{path::PathBuf, time};
 use thiserror::Error;
 use walkdir::WalkDir;
 
@@ -11,45 +11,61 @@ mod backends;
 mod cli;
 mod source;
 
-#[derive(Debug, Error)]
-#[error("while processing {path}:\n  {kind}")]
+#[derive(Debug, Error, Diagnostic)]
+#[error("Failed to generate code from source {path}")]
+#[diagnostic(forward(source))]
 struct CgenError {
     pub path: PathBuf,
-    pub kind: CgenErrorKind,
+    #[source]
+    pub source: CgenErrorKind,
 }
 
-#[derive(Debug, Error)]
+#[derive(Debug, Error, Diagnostic)]
 enum CgenErrorKind {
-    #[error("failed to parse content")]
+    #[error("Failed to parse content")]
     Parse(#[from] clang::SourceError),
-    #[error("failed to get source ranges")]
+    #[error("Failed to get source ranges")]
     SourceRange,
     #[error(transparent)]
+    #[diagnostic(transparent)]
     WriteError(#[from] crate::backends::WriteError),
 }
 
-fn main() {
+fn main() -> Result<(), Report> {
     let args = crate::cli::Args::parse();
 
-    colog::default_builder()
-        .filter_level(args.verbosity.into())
-        .init();
+    let start = time::Instant::now();
 
     let clang = Clang::new().unwrap();
 
-    if let Err(error) =
-        args.path
-            .into_iter()
-            .try_for_each(|path| match process_file(&clang, &path) {
-                Err(error) => Err(CgenError { path, kind: error }),
-                Ok(()) => Ok(()),
-            })
-    {
-        error!("{}", error);
+    let mut files_processed = 0u32;
+
+    if let Err(error) = args.path.into_iter().try_for_each(|path| {
+        match process_file(&mut files_processed, &clang, &path) {
+            Err(error) => Err(CgenError {
+                path,
+                source: error,
+            }),
+            Ok(()) => Ok(()),
+        }
+    }) {
+        return Err(error.into());
     }
+
+    println!(
+        "Generated {} files in {}ms",
+        files_processed,
+        start.elapsed().as_millis()
+    );
+
+    Ok(())
 }
 
-fn process_file(clang: &Clang, path: &PathBuf) -> Result<(), CgenErrorKind> {
+fn process_file(
+    files_processed: &mut u32,
+    clang: &Clang,
+    path: &PathBuf,
+) -> Result<(), CgenErrorKind> {
     if path.is_dir() {
         for file in WalkDir::new(path)
             .into_iter()
@@ -61,7 +77,7 @@ fn process_file(clang: &Clang, path: &PathBuf) -> Result<(), CgenErrorKind> {
                     .is_some_and(|f| matches!(f.to_str(), Some("c") | Some("cpp")))
             })
         {
-            process_file(clang, &file)?;
+            process_file(files_processed, clang, &file)?;
         }
 
         return Ok(());
@@ -76,6 +92,8 @@ fn process_file(clang: &Clang, path: &PathBuf) -> Result<(), CgenErrorKind> {
     let header = CHeader::new(path);
 
     header.write(header.generate_content(ranges))?;
+
+    *files_processed += 1;
 
     Ok(())
 }
