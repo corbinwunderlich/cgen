@@ -8,8 +8,11 @@ build = "build.rs"
 clang = "2.1.0"
 clap = { version = "4.6.6", features = ["derive"] }
 clap-verbosity-flag = "3.0.4"
+config = "0.15.25"
 indoc = "2.0.7"
 miette = { version = "7.6.0", features = ["fancy"] }
+serde = { version = "1.0.229", features = ["derive"] }
+smart-default = "0.7.1"
 thiserror = "2.0.20"
 twox-hash = "2.1.4"
 walkdir = "2.5.0"
