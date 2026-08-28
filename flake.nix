@@ -45,6 +45,9 @@
 
             postInstall = ''
               installManPage target/man/cgen.1
+
+              installShellCompletion target/completions/cgen.{bash,fish,nu}
+              installShellCompletion --zsh target/completions/_cgen
             '';
           };
 
