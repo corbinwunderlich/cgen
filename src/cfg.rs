@@ -55,9 +55,13 @@ impl Settings {
 }
 
 pub fn load() -> Result<(), Error> {
-    let settings = Config::builder()
-        .add_source(config::File::with_name("cgen").required(false))
-        .build()?;
+    let settings = Config::builder();
+
+    let settings = match &crate::cli::Args::global().config {
+        Some(path) => settings.add_source(config::File::from(path.to_owned()).required(true)),
+        None => settings.add_source(config::File::with_name("cgen").required(false)),
+    }
+    .build()?;
 
     match settings.try_deserialize() {
         Err(error) => Err(Error { source: error }),

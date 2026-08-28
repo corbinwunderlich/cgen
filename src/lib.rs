@@ -1,5 +1,4 @@
 use clang::Clang;
-use clap::Parser;
 use miette::{Diagnostic, Report};
 use std::{ffi::OsStr, path::PathBuf, time};
 use thiserror::Error;
@@ -7,10 +6,10 @@ use walkdir::WalkDir;
 
 use crate::backends::{Backend, CHeader};
 
-pub mod backends;
+mod backends;
 pub mod cfg;
-pub mod cli;
-pub mod source;
+mod cli;
+mod source;
 
 #[derive(Debug, Error, Diagnostic)]
 #[error("Failed to generate code from source {path}")]
@@ -39,8 +38,7 @@ enum CgenErrorKind {
 }
 
 pub fn main() -> Result<(), Report> {
-    let args = crate::cli::Args::parse();
-
+    crate::cli::load();
     crate::cfg::load()?;
 
     let start = time::Instant::now();
@@ -49,10 +47,10 @@ pub fn main() -> Result<(), Report> {
 
     let mut files_processed = 0u32;
 
-    if let Err(error) = args.path.into_iter().try_for_each(|path| {
-        match process_file(&mut files_processed, &clang, &path) {
+    if let Err(error) = crate::cli::Args::global().path.iter().try_for_each(|path| {
+        match process_file(&mut files_processed, &clang, path) {
             Err(error) => Err(CgenError {
-                path,
+                path: path.to_owned(),
                 source: error,
             }),
             Ok(()) => Ok(()),
