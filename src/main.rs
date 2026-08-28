@@ -1,15 +1,32 @@
+use clang::Clang;
 use clap::Parser;
 use log::error;
 use std::path::PathBuf;
+use thiserror::Error;
 use walkdir::WalkDir;
-
-use clang::Clang;
 
 use crate::backends::{Backend, CHeader};
 
 mod backends;
 mod cli;
 mod source;
+
+#[derive(Debug, Error)]
+#[error("while processing {path}:\n  {kind}")]
+struct CgenError {
+    pub path: PathBuf,
+    pub kind: CgenErrorKind,
+}
+
+#[derive(Debug, Error)]
+enum CgenErrorKind {
+    #[error("failed to parse content")]
+    Parse(#[from] clang::SourceError),
+    #[error("failed to get source ranges")]
+    SourceRange,
+    #[error(transparent)]
+    WriteError(#[from] crate::backends::WriteError),
+}
 
 fn main() {
     let args = crate::cli::Args::parse();
@@ -18,31 +35,23 @@ fn main() {
         .filter_level(args.verbosity.into())
         .init();
 
-    let clang = Clang::new();
+    let clang = Clang::new().unwrap();
 
-    if let Err(error) = clang {
-        error!("failed to initialize Libclang: {}", error);
-
-        return;
-    }
-
-    let clang = clang.unwrap();
-
-    if let Err(error) = args
-        .path
-        .into_iter()
-        .try_for_each(|path| process_file(&clang, path))
+    if let Err(error) =
+        args.path
+            .into_iter()
+            .try_for_each(|path| match process_file(&clang, &path) {
+                Err(error) => Err(CgenError { path, kind: error }),
+                Ok(()) => Ok(()),
+            })
     {
         error!("{}", error);
     }
 }
 
-fn process_file(
-    clang: &Clang,
-    path: PathBuf,
-) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
+fn process_file(clang: &Clang, path: &PathBuf) -> Result<(), CgenErrorKind> {
     if path.is_dir() {
-        for file in WalkDir::new(&path)
+        for file in WalkDir::new(path)
             .into_iter()
             .filter_map(|e| e.ok())
             .filter(|e| e.file_type().is_file())
@@ -52,7 +61,7 @@ fn process_file(
                     .is_some_and(|f| matches!(f.to_str(), Some("c") | Some("cpp")))
             })
         {
-            process_file(clang, file)?;
+            process_file(clang, &file)?;
         }
 
         return Ok(());
@@ -60,25 +69,11 @@ fn process_file(
 
     let index = clang::Index::new(clang, false, false);
 
-    let parser = index.parser(&path).parse();
+    let parser = index.parser(path).parse()?;
 
-    if let Err(error) = parser {
-        return Err(format!(
-            "failed to parse file {}: {}",
-            path.to_str().unwrap_or(""),
-            error
-        )
-        .into());
-    }
+    let ranges = source::ranges_from_ast(&parser).ok_or(CgenErrorKind::SourceRange)?;
 
-    let parser = parser.unwrap();
-
-    let ranges = source::ranges_from_ast(&parser).ok_or(format!(
-        "failed to get source ranges from file {}",
-        path.to_str().unwrap_or("")
-    ))?;
-
-    let header = CHeader::new(&path);
+    let header = CHeader::new(path);
 
     header.write(header.generate_content(ranges))?;
 
