@@ -1,5 +1,3 @@
-mod c_header;
-
 use std::{
     fs,
     path::{Path, PathBuf},
@@ -8,6 +6,7 @@ use std::{
 use miette::Diagnostic;
 use thiserror::Error;
 
+pub mod c_header;
 pub use c_header::CHeader;
 
 #[derive(Debug, Error, Diagnostic)]

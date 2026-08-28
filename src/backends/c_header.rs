@@ -5,9 +5,16 @@ use std::{
 
 use clang::EntityKind;
 use indoc::formatdoc;
+use serde::Deserialize;
+use smart_default::SmartDefault;
 use twox_hash::XxHash3_128;
 
-const HEADER_EXTENSION: &str = "h";
+#[derive(Debug, Deserialize, SmartDefault)]
+#[serde(default)]
+pub struct Config {
+    #[default("h")]
+    extension: String,
+}
 
 pub struct CHeader {
     source_path: PathBuf,
@@ -18,7 +25,8 @@ impl crate::backends::Backend for CHeader {
     fn new(source_path: &Path) -> Self {
         Self {
             source_path: source_path.to_owned(),
-            generated_path: source_path.with_extension(HEADER_EXTENSION),
+            generated_path: source_path
+                .with_extension(&crate::cfg::Settings::global().outputs.c_header.extension),
         }
     }
 

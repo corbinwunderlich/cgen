@@ -1,3 +1,5 @@
+use std::sync::OnceLock;
+
 use config::{Config, ConfigError};
 use miette::Diagnostic;
 use serde::Deserialize;
@@ -16,6 +18,8 @@ pub struct Error {
 pub struct Settings {
     #[serde(default)]
     pub inputs: InputsConfig,
+    #[serde(default)]
+    pub outputs: OutputsConfig,
 }
 
 #[derive(Debug, Deserialize, SmartDefault)]
@@ -25,13 +29,39 @@ pub struct InputsConfig {
     pub extensions: Vec<String>,
 }
 
-pub fn load() -> Result<Settings, Error> {
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum OutputKind {
+    CHeader,
+}
+
+#[derive(Debug, Deserialize, SmartDefault)]
+#[serde(default)]
+pub struct OutputsConfig {
+    #[default(vec![OutputKind::CHeader])]
+    pub enable: Vec<OutputKind>,
+    pub c_header: crate::backends::c_header::Config,
+}
+
+static SETTINGS: OnceLock<Settings> = OnceLock::new();
+
+impl Settings {
+    pub fn global() -> &'static Self {
+        SETTINGS.get().unwrap()
+    }
+}
+
+pub fn load() -> Result<(), Error> {
     let settings = Config::builder()
         .add_source(config::File::with_name("cgen").required(false))
         .build()?;
 
     match settings.try_deserialize() {
         Err(error) => Err(Error { source: error }),
-        Ok(settings) => Ok(settings),
+        Ok(settings) => {
+            SETTINGS.set(settings).unwrap();
+
+            Ok(())
+        }
     }
 }
