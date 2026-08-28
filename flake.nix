@@ -61,7 +61,10 @@
           hooks = {
             alejandra.enable = true;
 
-            mdformat.enable = true;
+            mdformat = {
+              enable = true;
+              excludes = ["CONFIG.md"];
+            };
 
             rustfmt.enable = true;
 
@@ -80,11 +83,26 @@
 
               pass_filenames = false;
             };
+
+            json-schema-for-humans = {
+              enable = true;
+
+              name = "JSON Schema for Humans";
+              entry = let
+                entry = pkgs.writeShellScript "json-schema-for-humans" ''
+                  ${pkgs.json-schema-for-humans}/bin/generate-schema-doc config.schema.json CONFIG.md \
+                    --config template_name=md \
+                    --config with_footer=false
+                '';
+              in "${entry}";
+
+              pass_filenames = false;
+            };
           };
         };
 
         devShells.default = pkgs.mkShell {
-          packages = with pkgs; [cargo libclang] ++ config.pre-commit.settings.enabledPackages;
+          packages = with pkgs; [cargo libclang json-schema-for-humans] ++ config.pre-commit.settings.enabledPackages;
 
           inherit (config.pre-commit) shellHook;
 

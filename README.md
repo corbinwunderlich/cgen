@@ -12,7 +12,7 @@ nix profile add github:corbinwunderlich/cgen
 
 # Configuration
 
-cgen can be configured through a cgen configuration file, located in the current working directory. It can be YAML, JSON, TOML, or any of the config types that [config-rs](https://crates.io/crates/config) supports.
+cgen can be configured through a cgen configuration file, located in the current working directory. It can be YAML, JSON, TOML, or any of the config types that [config-rs](https://crates.io/crates/config) supports. Documentation for the config file is available [here](./CONFIG.md).
 
 > [!TIP]
 > It is recommended to add the following (depending on your file format) to your config for LSP documentation:
