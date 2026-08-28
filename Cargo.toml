@@ -2,6 +2,7 @@
 name = "cgen"
 version = "0.1.0"
 edition = "2024"
+build = "build.rs"
 
 [dependencies]
 clang = "2.1.0"
@@ -12,3 +13,8 @@ indoc = "2.0.7"
 log = "0.4.34"
 twox-hash = "2.1.4"
 walkdir = "2.5.0"
+
+[build-dependencies]
+clap = { version = "4.6.6", features = ["derive"] }
+clap-verbosity-flag = "3.0.4"
+clap_mangen = "0.3.3"

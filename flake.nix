@@ -37,9 +37,15 @@
 
             src = ./.;
 
+            nativeBuildInputs = with pkgs; [installShellFiles];
+
             cargoLock.lockFile = ./Cargo.lock;
 
             LIBCLANG_PATH = lib.makeLibraryPath (with pkgs; [libclang]);
+
+            postInstall = ''
+              installManPage target/man/cgen.1
+            '';
           };
 
           default = self'.packages.cgen;

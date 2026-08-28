@@ -1,28 +1,18 @@
-use clap_verbosity_flag::{InfoLevel, Verbosity};
+use clap::Parser;
 use log::error;
 use std::path::PathBuf;
 use walkdir::WalkDir;
 
 use clang::Clang;
-use clap::Parser;
 
 use crate::backends::{Backend, CHeader};
 
 mod backends;
+mod cli;
 mod source;
 
-#[derive(Parser)]
-#[command(version, about)]
-struct Args {
-    /// Files or directories to transform
-    #[arg(required = true)]
-    path: Vec<PathBuf>,
-    #[command(flatten)]
-    verbosity: Verbosity<InfoLevel>,
-}
-
 fn main() {
-    let args = Args::parse();
+    let args = crate::cli::Args::parse();
 
     colog::default_builder()
         .filter_level(args.verbosity.into())
