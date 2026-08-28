@@ -8,7 +8,7 @@ use cgen;
 fn generate_schemas() {
     let schema = schema_for!(cgen::cfg::Settings);
 
-    let schema_path = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("cgen_config.json");
+    let schema_path = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("config.schema.json");
 
     fs::write(schema_path, serde_json::to_string_pretty(&schema).unwrap()).unwrap();
 }

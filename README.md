@@ -21,20 +21,20 @@ cgen can be configured through a cgen configuration file, located in the current
 >
 > ```json
 > {
->     "$schema": "https://raw.githubusercontent.com/corbinwunderlich/cgen/main/cgen_config.json"
+>     "$schema": "https://raw.githubusercontent.com/corbinwunderlich/cgen/main/config.schema.json"
 > }
 > ```
 >
 > YAML:
 >
 > ```yaml
-> # yaml-language-server: $schema=https://raw.githubusercontent.com/corbinwunderlich/cgen/main/cgen_config.json
+> # yaml-language-server: $schema=https://raw.githubusercontent.com/corbinwunderlich/cgen/main/config.schema.json
 > ```
 >
 > TOML:
 >
 > ```toml
-> #:schema https://raw.githubusercontent.com/corbinwunderlich/cgen/main/cgen_config.json
+> #:schema https://raw.githubusercontent.com/corbinwunderlich/cgen/main/config.schema.json
 > ```
 
 # Planned
