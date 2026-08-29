@@ -43,7 +43,6 @@ pub enum CgenErrorKind {
     #[error(transparent)]
     #[diagnostic(transparent)]
     WriteError(#[from] crate::backends::WriteError),
-    #[cfg(feature = "watch")]
     #[error(transparent)]
     #[diagnostic(transparent)]
     WatchError(#[from] crate::watch::WatchError),
@@ -68,7 +67,6 @@ pub fn main() -> Result<(), Report> {
 
     CLANG.0.set(Clang::new().unwrap()).unwrap();
 
-    #[cfg(feature = "watch")]
     if crate::cli::Args::global().watch {
         crate::watch::begin(&crate::cli::Args::global().path)?;
 

@@ -10,8 +10,8 @@ clap = { version = "4.6.6", features = ["derive"] }
 clap-verbosity-flag = "3.0.4"
 config = "0.15.25"
 indoc = "2.0.7"
-inotify = "0.11.5"
 miette = { version = "7.6.0", features = ["fancy"] }
+notify = "8.2.0"
 schemars = "1.2.2"
 serde = { version = "1.0.229", features = ["derive"] }
 smart-default = "0.7.1"
@@ -28,7 +28,3 @@ clap_complete = "4.6.9"
 clap_complete_nushell = "4.6.2"
 clap_mangen = "0.3.3"
 clap-verbosity-flag = "3.0.4"
-
-[features]
-default = ["watch"]
-watch = []

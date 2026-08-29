@@ -15,9 +15,11 @@ pub struct Args {
     #[arg(short, long)]
     pub config: Option<PathBuf>,
     /// Watch for changes in files/directories
-    #[cfg(feature = "watch")]
     #[arg(short, long, default_value_t = false)]
     pub watch: bool,
+    #[arg(long, default_value_t = 100)]
+    /// Polling interval for --watch, in milliseconds
+    pub watch_interval: u64,
     #[command(flatten)]
     pub verbosity: Verbosity<InfoLevel>,
 }
