@@ -33,7 +33,7 @@ pub trait Backend {
 
     fn out_path(&self) -> &PathBuf;
 
-    fn generate_content(&self, ranges: Vec<crate::source::SourceRange>) -> Option<String>;
+    fn generate_content(&self, ranges: Vec<crate::frontends::SourceRange>) -> Option<String>;
 
     fn write(&self, content: impl Into<Option<String>>) -> Result<(), WriteError> {
         if let Err(error) = fs::write(

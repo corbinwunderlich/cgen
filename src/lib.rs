@@ -4,12 +4,12 @@ use std::{ffi::OsStr, path::PathBuf, time};
 use thiserror::Error;
 use walkdir::WalkDir;
 
-use crate::backends::{Backend, CHeader};
+use crate::{backends::Backend, frontends::Frontend};
 
 mod backends;
 pub mod cfg;
 mod cli;
-mod source;
+mod frontends;
 
 #[derive(Debug, Error, Diagnostic)]
 #[error("Failed to generate code from source {path}")]
@@ -30,8 +30,9 @@ enum CgenErrorKind {
     DisallowedExtension { extension: String },
     #[error("Failed to parse content")]
     Parse(#[from] clang::SourceError),
-    #[error("Failed to get source ranges")]
-    SourceRange,
+    #[error(transparent)]
+    #[diagnostic(transparent)]
+    FrontendError(#[from] crate::frontends::Error),
     #[error(transparent)]
     #[diagnostic(transparent)]
     WriteError(#[from] crate::backends::WriteError),
@@ -109,15 +110,11 @@ fn process_file(
         });
     }
 
-    let index = clang::Index::new(clang, false, false);
+    let frontend = crate::frontends::LibClang::new(clang, path);
 
-    let parser = index.parser(path).parse()?;
+    let header = crate::backends::CHeader::new(path);
 
-    let ranges = source::ranges_from_ast(&parser).ok_or(CgenErrorKind::SourceRange)?;
-
-    let header = CHeader::new(path);
-
-    header.write(header.generate_content(ranges))?;
+    header.write(header.generate_content(frontend.generate_ranges()?))?;
 
     *files_processed += 1;
 

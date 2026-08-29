@@ -3,7 +3,6 @@ use std::{
     path::{Path, PathBuf},
 };
 
-use clang::EntityKind;
 use indoc::formatdoc;
 use schemars::JsonSchema;
 use serde::Deserialize;
@@ -37,34 +36,30 @@ impl crate::backends::Backend for CHeader {
         &self.generated_path
     }
 
-    fn generate_content(&self, ranges: Vec<crate::source::SourceRange>) -> Option<String> {
+    fn generate_content(&self, ranges: Vec<crate::frontends::SourceRange>) -> Option<String> {
         let file_content = fs::read_to_string(&self.source_path).ok()?;
 
         let result = ranges
             .into_iter()
-            .fold(String::new(), |mut accumulator, range| {
-                if let Some(comment) = range.1.get_comment() {
-                    accumulator.push_str(&(comment + "\n"));
-                }
+            .fold(
+                String::new(),
+                |mut accumulator, crate::frontends::SourceRange { range, comment }| {
+                    if let Some(comment) = comment {
+                        accumulator.push_str(&(comment + "\n"));
+                    }
 
-                let source = file_content.get(range.0.start as usize..range.0.end as usize);
+                    let Some(source) = file_content.get(range.start as usize..range.end as usize)
+                    else {
+                        return accumulator;
+                    };
 
-                if source.is_none() {
-                    return accumulator;
-                }
+                    accumulator.push_str(source);
 
-                let mut source = source.unwrap().to_owned();
+                    Self::restore_semicolons(&mut accumulator);
 
-                if range.1.get_kind() == EntityKind::FunctionDecl {
-                    Self::delete_function_body(&mut source);
-                }
-
-                accumulator.push_str(&source);
-
-                Self::restore_semicolons(&mut accumulator);
-
-                accumulator
-            })
+                    accumulator
+                },
+            )
             .trim()
             .to_owned();
 
@@ -73,31 +68,6 @@ impl crate::backends::Backend for CHeader {
 }
 
 impl CHeader {
-    fn delete_function_body(source: &mut String) {
-        let opening_brace = source.find('{');
-
-        let closing_brace = source.rfind('}').map(|pos| {
-            let remaining = &source[pos + 1..];
-
-            let mut i = 0usize;
-            for c in remaining.chars() {
-                if !c.is_whitespace() {
-                    break;
-                }
-
-                i += 1;
-            }
-
-            pos + i
-        });
-
-        if opening_brace.is_none() || closing_brace.is_none() {
-            return;
-        }
-
-        source.replace_range(opening_brace.unwrap()..closing_brace.unwrap() + 1, "");
-    }
-
     fn restore_semicolons(source: &mut String) {
         if let trimmed = source.trim_end()
             && !trimmed.ends_with(';')
