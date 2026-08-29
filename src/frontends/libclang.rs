@@ -1,4 +1,7 @@
-use std::{collections, ops, path::PathBuf};
+use std::{
+    collections, ops,
+    path::{Path, PathBuf},
+};
 
 use clang::{Clang, EntityKind};
 
@@ -10,10 +13,10 @@ pub struct LibClang<'a> {
 }
 
 impl<'a> LibClang<'a> {
-    pub fn new(clang: &'a Clang, source_path: &PathBuf) -> Self {
+    pub fn new(clang: &'a Clang, source_path: &Path) -> Self {
         LibClang {
             clang,
-            source_path: source_path.to_owned(),
+            source_path: source_path.into(),
         }
     }
 }

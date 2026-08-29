@@ -3,7 +3,7 @@ use miette::{Diagnostic, Report};
 use std::{
     cell::OnceCell,
     ffi::OsStr,
-    path::PathBuf,
+    path::{Path, PathBuf},
     sync::atomic::{AtomicU32, Ordering},
     time,
 };
@@ -107,7 +107,7 @@ pub fn main() -> Result<(), Report> {
     Ok(())
 }
 
-fn is_allowed_extension(path: &PathBuf) -> bool {
+fn is_allowed_extension(path: &Path) -> bool {
     path.extension().is_some_and(|e| {
         e.to_str().is_some_and(|e| {
             crate::cfg::Settings::global()
@@ -118,14 +118,14 @@ fn is_allowed_extension(path: &PathBuf) -> bool {
     })
 }
 
-pub fn process_file(path: &PathBuf) -> Result<(), CgenErrorKind> {
+pub fn process_file(path: &Path) -> Result<(), CgenErrorKind> {
     if path.is_dir() {
         for file in WalkDir::new(path)
             .into_iter()
             .filter_map(|e| e.ok())
             .filter(|e| e.file_type().is_file())
             .map(|e| e.into_path())
-            .filter(is_allowed_extension)
+            .filter(|p| is_allowed_extension(p))
         {
             process_file(&file)?;
         }
