@@ -14,6 +14,10 @@ pub struct Args {
     /// Path to config file
     #[arg(short, long)]
     pub config: Option<PathBuf>,
+    /// Watch for changes in files/directories
+    #[cfg(feature = "watch")]
+    #[arg(short, long, default_value_t = false)]
+    pub watch: bool,
     #[command(flatten)]
     pub verbosity: Verbosity<InfoLevel>,
 }
