@@ -51,11 +51,19 @@ pub enum CgenErrorKind {
 struct GlobalClang(OnceCell<Clang>);
 unsafe impl Sync for GlobalClang {}
 
+impl std::ops::Deref for GlobalClang {
+    type Target = OnceCell<Clang>;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
 static CLANG: GlobalClang = GlobalClang(OnceCell::new());
 
 impl GlobalClang {
     fn get() -> &'static Clang {
-        CLANG.0.get().unwrap()
+        CLANG.get().unwrap()
     }
 }
 
@@ -65,7 +73,7 @@ pub fn main() -> Result<(), Report> {
     crate::cli::load();
     crate::cfg::load()?;
 
-    CLANG.0.set(Clang::new().unwrap()).unwrap();
+    CLANG.set(Clang::new().unwrap()).unwrap();
 
     if crate::cli::Args::global().watch {
         crate::watch::begin(&crate::cli::Args::global().path)?;
