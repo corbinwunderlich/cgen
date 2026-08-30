@@ -30,7 +30,7 @@ pub fn begin(paths: &'static Vec<PathBuf>) -> Result<(), WatchError> {
         .filter_map(|event| event.ok())
         .flat_map(|event| event.paths)
         .filter_map(|path| {
-            crate::frontends::create_frontend(path.clone()).map(|frontend| (path, frontend))
+            crate::frontends::create_frontend(&path).map(|frontend| (path, frontend))
         })
         .for_each(|(path, frontend)| {
             println!("Path {:#?} changed, generating...", path);

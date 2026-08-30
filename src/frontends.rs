@@ -62,11 +62,11 @@ pub fn is_any_allowed_extension(path: &Path) -> bool {
     false
 }
 
-pub fn create_frontend(path: PathBuf) -> Option<impl Frontend> {
+pub fn create_frontend(path: &Path) -> Option<impl Frontend + use<>> {
     macro_rules! frontend {
         ($frontend:ident) => {
-            if $frontend::is_allowed_extension(&path) {
-                return Some($frontend::new(&path));
+            if $frontend::is_allowed_extension(path) {
+                return Some($frontend::new(path));
             }
         };
     }

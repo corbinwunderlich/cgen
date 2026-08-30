@@ -76,7 +76,7 @@ pub fn main() -> Result<(), Report> {
         })
         .try_for_each(|path| {
             match process_file(
-                crate::frontends::create_frontend(path.clone()).ok_or(CgenError {
+                crate::frontends::create_frontend(&path).ok_or(CgenError {
                     path: path.clone(),
                     source: CgenErrorKind::DisallowedExtension {
                         extension: path
@@ -89,7 +89,7 @@ pub fn main() -> Result<(), Report> {
                 })?,
             ) {
                 Err(error) => Err(CgenError {
-                    path: path.to_owned(),
+                    path,
                     source: error,
                 }),
                 Ok(()) => Ok(()),
