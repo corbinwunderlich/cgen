@@ -1,4 +1,5 @@
 use std::{
+    cell::OnceCell,
     collections, ops,
     path::{Path, PathBuf},
 };
@@ -18,17 +19,14 @@ pub struct ClangConfig {
     pub extensions: Vec<String>,
 }
 
-pub struct LibClang<'a> {
-    clang: &'a Clang,
-    source_path: PathBuf,
-}
+struct GlobalClang(OnceCell<Clang>);
+unsafe impl Sync for GlobalClang {}
 
-impl<'a> LibClang<'a> {
-    pub fn new(clang: &'a Clang, source_path: &Path) -> Self {
-        LibClang {
-            clang,
-            source_path: source_path.into(),
-        }
+static CLANG: GlobalClang = GlobalClang(OnceCell::new());
+
+impl GlobalClang {
+    fn get() -> &'static Clang {
+        CLANG.0.get_or_init(|| clang::Clang::new().unwrap())
     }
 }
 
@@ -142,7 +140,17 @@ fn range_from_node(ranges: Vec<SourceRange>, node: clang::Entity<'_>) -> Option<
     Some(ranges)
 }
 
-impl<'a> crate::frontends::Frontend for LibClang<'a> {
+pub struct LibClang {
+    source_path: PathBuf,
+}
+
+impl crate::frontends::Frontend for LibClang {
+    fn new(source_path: &Path) -> Self {
+        LibClang {
+            source_path: source_path.into(),
+        }
+    }
+
     fn is_allowed_extension(path: &Path) -> bool {
         path.extension().is_some_and(|e| {
             e.to_str().is_some_and(|e| {
@@ -156,7 +164,7 @@ impl<'a> crate::frontends::Frontend for LibClang<'a> {
     }
 
     fn generate_ranges(&self) -> Result<Vec<SourceRange>, super::Error> {
-        let index = clang::Index::new(self.clang, false, false);
+        let index = clang::Index::new(GlobalClang::get(), false, false);
 
         let parser = index
             .parser(self.source_path.clone())

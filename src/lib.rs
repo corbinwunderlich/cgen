@@ -1,7 +1,5 @@
-use clang::Clang;
 use miette::{Diagnostic, Report};
 use std::{
-    cell::OnceCell,
     ffi::OsStr,
     path::{Path, PathBuf},
     sync::atomic::{AtomicU32, Ordering},
@@ -48,32 +46,11 @@ pub enum CgenErrorKind {
     WatchError(#[from] crate::watch::WatchError),
 }
 
-struct GlobalClang(OnceCell<Clang>);
-unsafe impl Sync for GlobalClang {}
-
-impl std::ops::Deref for GlobalClang {
-    type Target = OnceCell<Clang>;
-
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-
-static CLANG: GlobalClang = GlobalClang(OnceCell::new());
-
-impl GlobalClang {
-    fn get() -> &'static Clang {
-        CLANG.get().unwrap()
-    }
-}
-
 static FILES_PROCESSED: AtomicU32 = AtomicU32::new(0);
 
 pub fn main() -> Result<(), Report> {
     crate::cli::load();
     crate::cfg::load()?;
-
-    CLANG.set(Clang::new().unwrap()).unwrap();
 
     if crate::cli::Args::global().watch {
         crate::watch::begin(&crate::cli::Args::global().path)?;
@@ -133,7 +110,7 @@ pub fn process_file(path: &Path) -> Result<(), CgenErrorKind> {
         });
     }
 
-    let frontend = crate::frontends::LibClang::new(GlobalClang::get(), path);
+    let frontend = crate::frontends::LibClang::new(path);
 
     let header = crate::backends::CHeader::new(path);
 

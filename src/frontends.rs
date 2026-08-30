@@ -32,6 +32,8 @@ pub struct SourceRange {
 }
 
 pub trait Frontend {
+    fn new(path: &Path) -> Self;
+
     fn is_allowed_extension(path: &Path) -> bool;
 
     fn generate_ranges(&self) -> Result<Vec<SourceRange>, Error>;
