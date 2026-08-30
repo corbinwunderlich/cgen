@@ -1,8 +1,9 @@
 # Settings
 
 - [1. Property `Settings > inputs`](#inputs)
-  - [1.1. Property `Settings > inputs > extensions`](#inputs_extensions)
-    - [1.1.1. Settings > inputs > extensions > extensions items](#inputs_extensions_items)
+  - [1.1. Property `Settings > inputs > clang`](#inputs_clang)
+    - [1.1.1. Property `Settings > inputs > clang > extensions`](#inputs_clang_extensions)
+      - [1.1.1.1. Settings > inputs > clang > extensions > extensions items](#inputs_clang_extensions_items)
 - [2. Property `Settings > outputs`](#outputs)
   - [2.1. Property `Settings > outputs > c_header`](#outputs_c_header)
     - [2.1.1. Property `Settings > outputs > c_header > extension`](#outputs_c_header_extension)
@@ -31,19 +32,32 @@
 | **Additional properties** | Any type allowed     |
 | **Defined in**            | #/$defs/InputsConfig |
 
-| Property                            | Pattern | Type            | Deprecated | Definition | Title/Description                                  |
-| ----------------------------------- | ------- | --------------- | ---------- | ---------- | -------------------------------------------------- |
-| - [extensions](#inputs_extensions ) | No      | array of string | No         | -          | The extensions which are allowed to be transformed |
+| Property                  | Pattern | Type   | Deprecated | Definition             | Title/Description |
+| ------------------------- | ------- | ------ | ---------- | ---------------------- | ----------------- |
+| - [clang](#inputs_clang ) | No      | object | No         | In #/$defs/ClangConfig | -                 |
 
-### <a name="inputs_extensions"></a>1.1. Property `Settings > inputs > extensions`
+### <a name="inputs_clang"></a>1.1. Property `Settings > inputs > clang`
 
-|              |                   |
-| ------------ | ----------------- |
-| **Type**     | `array of string` |
-| **Required** | No                |
-| **Default**  | `["c", "cpp"]`    |
+|                           |                     |
+| ------------------------- | ------------------- |
+| **Type**                  | `object`            |
+| **Required**              | No                  |
+| **Additional properties** | Any type allowed    |
+| **Defined in**            | #/$defs/ClangConfig |
 
-**Description:** The extensions which are allowed to be transformed
+| Property                                  | Pattern | Type            | Deprecated | Definition | Title/Description                        |
+| ----------------------------------------- | ------- | --------------- | ---------- | ---------- | ---------------------------------------- |
+| - [extensions](#inputs_clang_extensions ) | No      | array of string | No         | -          | The extensions which are parsed by Clang |
+
+#### <a name="inputs_clang_extensions"></a>1.1.1. Property `Settings > inputs > clang > extensions`
+
+|              |                                               |
+| ------------ | --------------------------------------------- |
+| **Type**     | `array of string`                             |
+| **Required** | No                                            |
+| **Default**  | `["c", "cpp", "cc", "cxx", "c++", "m", "mm"]` |
+
+**Description:** The extensions which are parsed by Clang
 
 |                      | Array restrictions |
 | -------------------- | ------------------ |
@@ -53,11 +67,11 @@
 | **Additional items** | False              |
 | **Tuple validation** | See below          |
 
-| Each item of this array must be              | Description |
-| -------------------------------------------- | ----------- |
-| [extensions items](#inputs_extensions_items) | -           |
+| Each item of this array must be                    | Description |
+| -------------------------------------------------- | ----------- |
+| [extensions items](#inputs_clang_extensions_items) | -           |
 
-#### <a name="inputs_extensions_items"></a>1.1.1. Settings > inputs > extensions > extensions items
+##### <a name="inputs_clang_extensions_items"></a>1.1.1.1. Settings > inputs > clang > extensions > extensions items
 
 |              |          |
 | ------------ | -------- |
@@ -73,19 +87,19 @@
 | **Additional properties** | Any type allowed      |
 | **Defined in**            | #/$defs/OutputsConfig |
 
-| Property                         | Pattern | Type   | Deprecated | Definition        | Title/Description     |
-| -------------------------------- | ------- | ------ | ---------- | ----------------- | --------------------- |
-| - [c_header](#outputs_c_header ) | No      | object | No         | In #/$defs/Config | -                     |
-| - [enable](#outputs_enable )     | No      | array  | No         | -                 | The outputs to enable |
+| Property                         | Pattern | Type   | Deprecated | Definition               | Title/Description     |
+| -------------------------------- | ------- | ------ | ---------- | ------------------------ | --------------------- |
+| - [c_header](#outputs_c_header ) | No      | object | No         | In #/$defs/CHeaderConfig | -                     |
+| - [enable](#outputs_enable )     | No      | array  | No         | -                        | The outputs to enable |
 
 ### <a name="outputs_c_header"></a>2.1. Property `Settings > outputs > c_header`
 
-|                           |                  |
-| ------------------------- | ---------------- |
-| **Type**                  | `object`         |
-| **Required**              | No               |
-| **Additional properties** | Any type allowed |
-| **Defined in**            | #/$defs/Config   |
+|                           |                       |
+| ------------------------- | --------------------- |
+| **Type**                  | `object`              |
+| **Required**              | No                    |
+| **Additional properties** | Any type allowed      |
+| **Defined in**            | #/$defs/CHeaderConfig |
 
 | Property                                    | Pattern | Type   | Deprecated | Definition | Title/Description                         |
 | ------------------------------------------- | ------- | ------ | ---------- | ---------- | ----------------------------------------- |

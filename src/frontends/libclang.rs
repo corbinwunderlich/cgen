@@ -4,8 +4,19 @@ use std::{
 };
 
 use clang::{Clang, EntityKind};
+use schemars::JsonSchema;
+use serde::Deserialize;
+use smart_default::SmartDefault;
 
 use super::SourceRange;
+
+#[derive(Debug, Deserialize, JsonSchema, SmartDefault)]
+#[serde(default)]
+pub struct ClangConfig {
+    #[default(["c", "cpp", "cc", "cxx", "c++", "m", "mm"].iter().map(|e| e.to_string()).collect())]
+    /// The extensions which are parsed by Clang
+    pub extensions: Vec<String>,
+}
 
 pub struct LibClang<'a> {
     clang: &'a Clang,
@@ -132,6 +143,18 @@ fn range_from_node(ranges: Vec<SourceRange>, node: clang::Entity<'_>) -> Option<
 }
 
 impl<'a> crate::frontends::Frontend for LibClang<'a> {
+    fn is_allowed_extension(path: &Path) -> bool {
+        path.extension().is_some_and(|e| {
+            e.to_str().is_some_and(|e| {
+                crate::cfg::Settings::global()
+                    .inputs
+                    .clang
+                    .extensions
+                    .contains(&e.into())
+            })
+        })
+    }
+
     fn generate_ranges(&self) -> Result<Vec<SourceRange>, super::Error> {
         let index = clang::Index::new(self.clang, false, false);
 

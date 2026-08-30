@@ -11,7 +11,7 @@ use twox_hash::XxHash3_128;
 
 #[derive(Debug, Deserialize, JsonSchema, SmartDefault)]
 #[serde(default)]
-pub struct Config {
+pub struct CHeaderConfig {
     #[default("h")]
     #[schemars(example = &"hpp", example = &"h")]
     /// The output extension for the header files

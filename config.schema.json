@@ -11,7 +11,7 @@
     }
   },
   "$defs": {
-    "Config": {
+    "CHeaderConfig": {
       "type": "object",
       "properties": {
         "extension": {
@@ -25,19 +25,32 @@
         }
       }
     },
-    "InputsConfig": {
+    "ClangConfig": {
       "type": "object",
       "properties": {
         "extensions": {
-          "description": "The extensions which are allowed to be transformed",
+          "description": "The extensions which are parsed by Clang",
           "type": "array",
           "default": [
             "c",
-            "cpp"
+            "cpp",
+            "cc",
+            "cxx",
+            "c++",
+            "m",
+            "mm"
           ],
           "items": {
             "type": "string"
           }
+        }
+      }
+    },
+    "InputsConfig": {
+      "type": "object",
+      "properties": {
+        "clang": {
+          "$ref": "#/$defs/ClangConfig"
         }
       }
     },
@@ -51,7 +64,7 @@
       "type": "object",
       "properties": {
         "c_header": {
-          "$ref": "#/$defs/Config"
+          "$ref": "#/$defs/CHeaderConfig"
         },
         "enable": {
           "description": "The outputs to enable",

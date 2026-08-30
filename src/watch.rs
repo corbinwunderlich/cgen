@@ -4,6 +4,8 @@ use miette::Diagnostic;
 use notify::Watcher;
 use thiserror::Error;
 
+use crate::frontends::Frontend;
+
 #[derive(Debug, Error, Diagnostic)]
 #[error("Failed to watch file or directory")]
 pub enum WatchError {
@@ -29,6 +31,7 @@ pub fn begin(paths: &'static Vec<PathBuf>) -> Result<(), WatchError> {
     rx.iter()
         .filter_map(|event| event.ok())
         .flat_map(|event| event.paths)
+        .filter(|path| crate::frontends::LibClang::is_allowed_extension(path))
         .for_each(|path| {
             println!("Path {:#?} changed, generating...", path);
 

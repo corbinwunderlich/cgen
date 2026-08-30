@@ -26,9 +26,7 @@ pub struct Settings {
 #[derive(Debug, Deserialize, JsonSchema, SmartDefault)]
 #[serde(default)]
 pub struct InputsConfig {
-    #[default(vec!["c".into(), "cpp".into()])]
-    /// The extensions which are allowed to be transformed
-    pub extensions: Vec<String>,
+    pub clang: crate::frontends::ClangConfig,
 }
 
 #[derive(Debug, Deserialize, JsonSchema)]
@@ -43,7 +41,7 @@ pub struct OutputsConfig {
     #[default(vec![OutputKind::CHeader])]
     /// The outputs to enable
     pub enable: Vec<OutputKind>,
-    pub c_header: crate::backends::c_header::Config,
+    pub c_header: crate::backends::CHeaderConfig,
 }
 
 static SETTINGS: OnceLock<Settings> = OnceLock::new();

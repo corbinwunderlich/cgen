@@ -1,10 +1,10 @@
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 use miette::Diagnostic;
 use thiserror::Error;
 
 mod libclang;
-pub use libclang::LibClang;
+pub use libclang::{ClangConfig, LibClang};
 
 #[derive(Debug, Error, Diagnostic)]
 #[error("Failed to parse {path}")]
@@ -32,5 +32,7 @@ pub struct SourceRange {
 }
 
 pub trait Frontend {
+    fn is_allowed_extension(path: &Path) -> bool;
+
     fn generate_ranges(&self) -> Result<Vec<SourceRange>, Error>;
 }

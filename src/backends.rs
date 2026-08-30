@@ -6,8 +6,8 @@ use std::{
 use miette::Diagnostic;
 use thiserror::Error;
 
-pub mod c_header;
-pub use c_header::CHeader;
+mod c_header;
+pub use c_header::{CHeader, CHeaderConfig};
 
 #[derive(Debug, Error, Diagnostic)]
 #[error("Failed to write to {path}")]

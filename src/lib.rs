@@ -107,17 +107,6 @@ pub fn main() -> Result<(), Report> {
     Ok(())
 }
 
-fn is_allowed_extension(path: &Path) -> bool {
-    path.extension().is_some_and(|e| {
-        e.to_str().is_some_and(|e| {
-            crate::cfg::Settings::global()
-                .inputs
-                .extensions
-                .contains(&e.to_owned())
-        })
-    })
-}
-
 pub fn process_file(path: &Path) -> Result<(), CgenErrorKind> {
     if path.is_dir() {
         for file in WalkDir::new(path)
@@ -125,7 +114,7 @@ pub fn process_file(path: &Path) -> Result<(), CgenErrorKind> {
             .filter_map(|e| e.ok())
             .filter(|e| e.file_type().is_file())
             .map(|e| e.into_path())
-            .filter(|p| is_allowed_extension(p))
+            .filter(|p| crate::frontends::LibClang::is_allowed_extension(p))
         {
             process_file(&file)?;
         }
@@ -133,7 +122,7 @@ pub fn process_file(path: &Path) -> Result<(), CgenErrorKind> {
         return Ok(());
     }
 
-    if !is_allowed_extension(path) {
+    if !crate::frontends::LibClang::is_allowed_extension(path) {
         return Err(CgenErrorKind::DisallowedExtension {
             extension: path
                 .extension()
