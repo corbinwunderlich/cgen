@@ -8,8 +8,6 @@ use std::{
 use thiserror::Error;
 use walkdir::WalkDir;
 
-use crate::{backends::Backend, frontends::Frontend};
-
 mod backends;
 pub mod cfg;
 mod cli;
@@ -30,7 +28,7 @@ pub enum CgenErrorKind {
     #[error("File extension '{extension}' is not allowed")]
     #[diagnostic(
         code(cgen::main::disallowed_extension),
-        help = "Add the extension to inputs.extensions in the config file."
+        help = "Add the extension to any inputs.[input].extensions in the config file."
     )]
     DisallowedExtension { extension: String },
     #[error("Failed to parse content")]
@@ -60,17 +58,43 @@ pub fn main() -> Result<(), Report> {
 
     let start = time::Instant::now();
 
-    if let Err(error) =
-        crate::cli::Args::global()
-            .path
-            .iter()
-            .try_for_each(|path| match process_file(path) {
+    if let Err(error) = crate::cli::Args::global()
+        .path
+        .iter()
+        .flat_map(|path| {
+            if !path.is_dir() {
+                return vec![path.clone()];
+            }
+
+            WalkDir::new(path)
+                .into_iter()
+                .filter_map(|e| e.ok())
+                .filter(|e| e.file_type().is_file())
+                .map(|file| file.into_path())
+                .filter(|path| crate::frontends::is_any_allowed_extension(path))
+                .collect()
+        })
+        .try_for_each(|path| {
+            match process_file(
+                crate::frontends::create_frontend(path.clone()).ok_or(CgenError {
+                    path: path.clone(),
+                    source: CgenErrorKind::DisallowedExtension {
+                        extension: path
+                            .extension()
+                            .unwrap_or(OsStr::new(""))
+                            .to_str()
+                            .unwrap_or("")
+                            .to_string(),
+                    },
+                })?,
+            ) {
                 Err(error) => Err(CgenError {
                     path: path.to_owned(),
                     source: error,
                 }),
                 Ok(()) => Ok(()),
-            })
+            }
+        })
     {
         return Err(error.into());
     }
@@ -84,42 +108,23 @@ pub fn main() -> Result<(), Report> {
     Ok(())
 }
 
-pub fn process_file(path: &Path) -> Result<(), CgenErrorKind> {
-    if path.is_dir() {
-        for file in WalkDir::new(path)
-            .into_iter()
-            .filter_map(|e| e.ok())
-            .filter(|e| e.file_type().is_file())
-            .map(|e| e.into_path())
-            .filter(|p| crate::frontends::LibClang::is_allowed_extension(p))
-        {
-            process_file(&file)?;
-        }
+pub fn process_file<F: crate::frontends::Frontend>(frontend: F) -> Result<(), CgenErrorKind> {
+    let path = frontend.source_path();
 
-        return Ok(());
+    fn write_to_backend<Backend: crate::backends::Backend>(
+        frontend: &impl crate::frontends::Frontend,
+        path: &Path,
+    ) -> Result<(), CgenErrorKind> {
+        let backend = Backend::new(path);
+
+        backend.write(backend.generate_content(frontend.generate_ranges()?))?;
+
+        Ok(())
     }
 
-    if !crate::frontends::LibClang::is_allowed_extension(path) {
-        return Err(CgenErrorKind::DisallowedExtension {
-            extension: path
-                .extension()
-                .unwrap_or(OsStr::new(""))
-                .to_str()
-                .unwrap()
-                .to_owned(),
-        });
-    }
+    crate::backends::for_each_backend!(write_to_backend, &frontend, path);
 
-    let frontend = crate::frontends::LibClang::new(path);
-
-    let header = crate::backends::CHeader::new(path);
-
-    header.write(header.generate_content(frontend.generate_ranges()?))?;
-
-    FILES_PROCESSED.store(
-        FILES_PROCESSED.load(Ordering::Relaxed) + 1,
-        Ordering::Relaxed,
-    );
+    FILES_PROCESSED.fetch_add(1, Ordering::Relaxed);
 
     Ok(())
 }

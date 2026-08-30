@@ -52,3 +52,11 @@ pub trait Backend {
         Ok(())
     }
 }
+
+macro_rules! for_each_backend {
+    ($function:ident, $($arg:expr),* $(,)?) => {
+        $function::<$crate::backends::CHeader>($($arg),*)?
+    };
+}
+
+pub(crate) use for_each_backend;

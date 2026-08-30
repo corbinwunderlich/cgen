@@ -151,6 +151,10 @@ impl crate::frontends::Frontend for LibClang {
         }
     }
 
+    fn source_path(&self) -> &Path {
+        &self.source_path
+    }
+
     fn is_allowed_extension(path: &Path) -> bool {
         path.extension().is_some_and(|e| {
             e.to_str().is_some_and(|e| {
