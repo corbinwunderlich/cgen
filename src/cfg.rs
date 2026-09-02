@@ -1,6 +1,9 @@
-use std::sync::OnceLock;
+use std::{
+    env, fs,
+    path::{Path, PathBuf},
+    sync::OnceLock,
+};
 
-use config::{Config, ConfigError};
 use miette::Diagnostic;
 use schemars::JsonSchema;
 use serde::Deserialize;
@@ -9,10 +12,22 @@ use thiserror::Error;
 
 #[derive(Debug, Error, Diagnostic)]
 #[error("Failed to load config file")]
-#[diagnostic(code(cgen::cfg::config_file_error))]
-pub struct Error {
-    #[from]
-    pub source: ConfigError,
+pub enum Error {
+    #[error("Config file not found")]
+    #[diagnostic(code(cgen::cfg::not_found))]
+    NotFound,
+    #[error("Config file is in invalid format")]
+    #[diagnostic(code(cgen::cfg::invalid_format))]
+    InvalidFormat,
+    #[error("Config file path has an invalid extension")]
+    #[diagnostic(
+        code(cgen::cfg::invalid_extension),
+        help = "Change the config file extension to be json, yaml, or toml."
+    )]
+    InvalidExtension,
+    #[error(transparent)]
+    #[diagnostic(code(cgen::cfg::io_error))]
+    Io(#[from] std::io::Error),
 }
 
 #[derive(Debug, Deserialize, JsonSchema)]
@@ -52,21 +67,89 @@ impl Settings {
     }
 }
 
-pub fn load() -> Result<(), Error> {
-    let settings = Config::builder();
+struct ConfigFile {
+    content: String,
+    format: ConfigFormat,
+}
 
-    let settings = match &crate::cli::Args::global().config {
-        Some(path) => settings.add_source(config::File::from(path.to_owned()).required(true)),
-        None => settings.add_source(config::File::with_name("cgen").required(false)),
-    }
-    .build()?;
+enum ConfigFormat {
+    Json,
+    Yaml,
+    Toml,
+}
 
-    match settings.try_deserialize() {
-        Err(error) => Err(Error { source: error }),
-        Ok(settings) => {
-            SETTINGS.set(settings).unwrap();
+fn search_upwards<'a>(
+    dir: &Path,
+    files: impl IntoIterator<Item = &'a str> + Clone,
+) -> Option<(PathBuf, String)> {
+    for file in files.clone() {
+        let path = dir.join(file);
 
-            Ok(())
+        if let Ok(content) = fs::read_to_string(&path) {
+            return Some((path, content));
         }
     }
+
+    search_upwards(dir.parent()?, files)
+}
+
+fn format_from_extension(extension: &str) -> Option<ConfigFormat> {
+    match extension {
+        "json" => Some(ConfigFormat::Json),
+        "yml" | "yaml" => Some(ConfigFormat::Yaml),
+        "toml" => Some(ConfigFormat::Toml),
+        _ => None,
+    }
+}
+
+fn search_for_configs<'a>(
+    configs: impl IntoIterator<Item = &'a str> + Clone,
+) -> Option<ConfigFile> {
+    let (path, content) = search_upwards(&env::current_dir().ok()?, configs)?;
+
+    let extension = path.extension()?.to_str()?;
+
+    Some(ConfigFile {
+        content,
+        format: format_from_extension(extension)?,
+    })
+}
+
+fn parse_config_file(file: &ConfigFile) -> Result<(), Error> {
+    let settings = match file.format {
+        ConfigFormat::Json => serde_json::from_str::<Settings>(&file.content).ok(),
+        ConfigFormat::Yaml => noyalib::from_str::<Settings>(&file.content).ok(),
+        ConfigFormat::Toml => toml::from_str::<Settings>(&file.content).ok(),
+    }
+    .ok_or(Error::InvalidFormat)?;
+
+    SETTINGS.set(settings).unwrap();
+
+    Ok(())
+}
+
+pub fn load() -> Result<(), Error> {
+    if let Some(path) = &crate::cli::Args::global().config {
+        let content = fs::read_to_string(path)?;
+
+        let extension = path
+            .extension()
+            .ok_or(Error::InvalidExtension)?
+            .to_str()
+            .ok_or(Error::InvalidExtension)?;
+
+        parse_config_file(&ConfigFile {
+            content,
+            format: format_from_extension(extension).ok_or(Error::InvalidExtension)?,
+        })?;
+
+        return Ok(());
+    }
+
+    let config_file = search_for_configs(["cgen.json", "cgen.yml", "cgen.yaml", "cgen.toml"])
+        .ok_or(Error::NotFound)?;
+
+    parse_config_file(&config_file)?;
+
+    Ok(())
 }
