@@ -78,7 +78,6 @@
             tests = {
               enable = true;
 
-              name = "Tests";
               entry = "${pkgs.cargo}/bin/cargo test";
 
               pass_filenames = false;
@@ -99,14 +98,17 @@
               pass_filenames = false;
             };
 
-            pandoc = {
+            generate-usage = {
               enable = true;
 
+              name = "generate USAGE.md";
               entry = let
-                entry = pkgs.writeShellScript "pandoc" ''
-                  ${pkgs.cargo}/bin/cargo check
-
-                  ${pkgs.pandoc}/bin/pandoc -f man -t markdown target/man/cgen.1 -o USAGE.md
+                entry = pkgs.writeShellScript "generate-usage" ''
+                  cat > USAGE.md << EOF
+                  \`\`\`
+                  $(${pkgs.cargo}/bin/cargo run --quiet -- --help)
+                  \`\`\`
+                  EOF
                 '';
               in "${entry}";
 
