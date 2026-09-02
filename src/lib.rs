@@ -1,3 +1,4 @@
+use ignore::WalkBuilder;
 use miette::{Diagnostic, Report};
 use std::{
     ffi::OsStr,
@@ -6,7 +7,6 @@ use std::{
     time,
 };
 use thiserror::Error;
-use walkdir::WalkDir;
 
 mod backends;
 pub mod cfg;
@@ -66,11 +66,16 @@ pub fn main() -> Result<(), Report> {
                 return vec![path.clone()];
             }
 
-            WalkDir::new(path)
-                .into_iter()
-                .filter_map(|e| e.ok())
-                .filter(|e| e.file_type().is_file())
-                .map(|file| file.into_path())
+            WalkBuilder::new(path)
+                .hidden(crate::cli::Args::global().hidden)
+                .ignore(crate::cli::Args::global().ignore)
+                .git_global(crate::cli::Args::global().ignore)
+                .git_ignore(crate::cli::Args::global().ignore)
+                .git_exclude(crate::cli::Args::global().ignore)
+                .build()
+                .filter_map(Result::ok)
+                .filter(|e| e.file_type().is_some_and(|e| e.is_file()))
+                .map(|e| e.into_path())
                 .filter(|path| crate::frontends::is_any_allowed_extension(path))
                 .collect()
         })

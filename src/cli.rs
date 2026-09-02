@@ -20,6 +20,12 @@ pub struct Args {
     #[arg(long, default_value_t = 100)]
     /// Polling interval for --watch, in milliseconds
     pub watch_interval: u64,
+    #[arg(short = 'I', long, default_value_t = false)]
+    /// Respect .gitignore and .ignore when transforming directories (on by default)
+    pub ignore: bool,
+    #[arg(short = 'H', long, default_value_t = false)]
+    /// Allow transforming hidden files and directories (off by default)
+    pub hidden: bool,
     #[command(flatten)]
     pub verbosity: Verbosity<InfoLevel>,
 }

@@ -37,6 +37,8 @@ cgen can be configured through a cgen configuration file, located in the current
 > #:schema https://raw.githubusercontent.com/corbinwunderlich/cgen/main/config.schema.json
 > ```
 
+cgen will respect .ignore and .gitignore files unless told otherwise with command line flags. Flags can be viewed with `man cgen`, `--help`, or [here](./USAGE.md).
+
 # Planned
 
 - Bindings generation

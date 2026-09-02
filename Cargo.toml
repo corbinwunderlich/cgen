@@ -8,6 +8,7 @@ build = "build.rs"
 clang = "2.1.0"
 clap = { version = "4.6.6", features = ["derive"] }
 clap-verbosity-flag = "3.0.4"
+ignore = "0.4.33"
 indoc = "2.0.7"
 miette = { version = "7.6.0", features = ["fancy-no-backtrace"] }
 notify = { version = "8.2.0", default-features = false }
@@ -23,7 +24,6 @@ toml = {
   features = ["parse", "serde"]
 }
 twox-hash = "2.1.4"
-walkdir = "2.5.0"
 
 [dev-dependencies]
 serde_json = "1.0.151"

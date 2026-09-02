@@ -63,7 +63,7 @@
 
             mdformat = {
               enable = true;
-              excludes = ["CONFIG.md"];
+              excludes = ["CONFIG.md" "USAGE.md"];
             };
 
             rustfmt.enable = true;
@@ -87,12 +87,26 @@
             json-schema-for-humans = {
               enable = true;
 
-              name = "JSON Schema for Humans";
+              name = "json schema for humans";
               entry = let
                 entry = pkgs.writeShellScript "json-schema-for-humans" ''
                   ${pkgs.json-schema-for-humans}/bin/generate-schema-doc config.schema.json CONFIG.md \
                     --config template_name=md \
                     --config with_footer=false
+                '';
+              in "${entry}";
+
+              pass_filenames = false;
+            };
+
+            pandoc = {
+              enable = true;
+
+              entry = let
+                entry = pkgs.writeShellScript "pandoc" ''
+                  ${pkgs.cargo}/bin/cargo check
+
+                  ${pkgs.pandoc}/bin/pandoc -f man -t markdown target/man/cgen.1 -o USAGE.md
                 '';
               in "${entry}";
 
