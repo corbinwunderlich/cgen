@@ -10,7 +10,7 @@ use thiserror::Error;
 
 mod backends;
 pub mod cfg;
-mod cli;
+pub mod cli;
 mod frontends;
 mod watch;
 

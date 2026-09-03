@@ -1,0 +1,36 @@
+.ie \n(.g .ds Aq \(aq
+.el .ds Aq '
+.TH cgen 1  "cgen 0.1.0" 
+.SH NAME
+cgen \- A C/C++ header generator built in Rust
+.SH SYNOPSIS
+\fBcgen\fR [\fB\-c\fR|\fB\-\-config\fR] [\fB\-w\fR|\fB\-\-watch\fR] [\fB\-\-watch\-interval\fR] [\fB\-I\fR|\fB\-\-ignore\fR] [\fB\-H\fR|\fB\-\-hidden\fR] [\fB\-h\fR|\fB\-\-help\fR] [\fB\-V\fR|\fB\-\-version\fR] <\fIPATH\fR> 
+.SH DESCRIPTION
+A C/C++ header generator built in Rust
+.SH OPTIONS
+.TP
+\fB\-c\fR, \fB\-\-config\fR \fI<CONFIG>\fR
+Path to config file
+.TP
+\fB\-w\fR, \fB\-\-watch\fR
+Watch for changes in files/directories
+.TP
+\fB\-\-watch\-interval\fR \fI<WATCH_INTERVAL>\fR [default: 100]
+Polling interval for \-\-watch, in milliseconds
+.TP
+\fB\-I\fR, \fB\-\-ignore\fR
+Respect .gitignore and .ignore when transforming directories (on by default)
+.TP
+\fB\-H\fR, \fB\-\-hidden\fR
+Allow transforming hidden files and directories (off by default)
+.TP
+\fB\-h\fR, \fB\-\-help\fR
+Print help
+.TP
+\fB\-V\fR, \fB\-\-version\fR
+Print version
+.TP
+<\fIPATH\fR>
+Files or directories to transform
+.SH VERSION
+v0.1.0

@@ -18,7 +18,7 @@ rustPlatform.buildRustPackage {
   LIBCLANG_PATH = lib.makeLibraryPath [libclang];
 
   postInstall = ''
-    installManPage target/man/cgen.1
-    installShellCompletion target/completions/cgen.{bash,fish,nu} --zsh target/completions/_cgen
+    installManPage manpages/cgen.1
+    installShellCompletion completions/cgen.{bash,fish,nu} --zsh completions/_cgen
   '';
 }

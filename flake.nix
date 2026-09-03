@@ -59,10 +59,17 @@
               };
             };
 
-            tests = {
+            xtask = {
               enable = true;
 
-              entry = "${pkgs.cargo}/bin/cargo test";
+              name = "cargo xtask";
+              entry = let
+                entry = pkgs.writeShellScript "cargo-xtask" ''
+                  ${pkgs.cargo}/bin/cargo xtask manpages
+                  ${pkgs.cargo}/bin/cargo xtask completions
+                  ${pkgs.cargo}/bin/cargo xtask json-schema
+                '';
+              in "${entry}";
 
               pass_filenames = false;
             };
