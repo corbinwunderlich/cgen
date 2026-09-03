@@ -19,8 +19,6 @@ rustPlatform.buildRustPackage {
 
   postInstall = ''
     installManPage target/man/cgen.1
-
-    installShellCompletion target/completions/cgen.{bash,fish,nu}
-    installShellCompletion --zsh target/completions/_cgen
+    installShellCompletion target/completions/cgen.{bash,fish,nu} --zsh target/completions/_cgen
   '';
 }
