@@ -4,7 +4,41 @@ cgen is a C/C++ header generator built in Rust. It supports almost all of C, eve
 
 # Installation
 
-The recommended installation is with Nix. Add it as an input to your devshells, or install it imperatively with
+The recommended installation is with Nix. You can...
+
+Add it as an input to your flake:
+
+```nix
+{
+  inputs = {
+    cgen = {
+      url = "github:corbinwunderlich/cgen";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+  };
+}
+```
+
+...and use it as a package with:
+
+```nix
+inputs.cgen.packages.${pkgs.stdenv.hostPlatform.system}.default
+```
+
+Add it as a tarball to non-flake projects (not recommended):
+
+```nix
+let
+  cgenSrc = builtins.fetchTarball {
+    url = "https://github.com/corbinwunderlich/cgen";
+    sha256 = "AAA..."; # find the real hash
+  };
+
+  cgen = import cgenSrc {};
+in
+```
+
+Or install it imperatively:
 
 ```sh
 nix profile add github:corbinwunderlich/cgen
