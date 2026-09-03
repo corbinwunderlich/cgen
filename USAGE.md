@@ -1,4 +1,6 @@
 ```
+A C/C++ header generator built in Rust
+
 Usage: cgen [OPTIONS] <PATH>...
 
 Arguments:

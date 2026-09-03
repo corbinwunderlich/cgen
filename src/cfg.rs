@@ -56,7 +56,17 @@ pub struct OutputsConfig {
     #[default(vec![OutputKind::CHeader])]
     /// The outputs to enable
     pub enable: Vec<OutputKind>,
+    #[serde(default)]
+    pub all: AllOutputsConfig,
     pub c_header: crate::backends::CHeaderConfig,
+}
+
+#[derive(Debug, Deserialize, JsonSchema, SmartDefault)]
+#[serde(default)]
+pub struct AllOutputsConfig {
+    #[default(true)]
+    /// Adds a watermark displaying cgen version to generated files
+    pub watermark: bool,
 }
 
 static SETTINGS: OnceLock<Settings> = OnceLock::new();

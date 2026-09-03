@@ -5,10 +5,12 @@
     - [1.1.1. Property `Settings > inputs > clang > extensions`](#inputs_clang_extensions)
       - [1.1.1.1. Settings > inputs > clang > extensions > extensions items](#inputs_clang_extensions_items)
 - [2. Property `Settings > outputs`](#outputs)
-  - [2.1. Property `Settings > outputs > c_header`](#outputs_c_header)
-    - [2.1.1. Property `Settings > outputs > c_header > extension`](#outputs_c_header_extension)
-  - [2.2. Property `Settings > outputs > enable`](#outputs_enable)
-    - [2.2.1. Settings > outputs > enable > OutputKind](#outputs_enable_items)
+  - [2.1. Property `Settings > outputs > all`](#outputs_all)
+    - [2.1.1. Property `Settings > outputs > all > watermark`](#outputs_all_watermark)
+  - [2.2. Property `Settings > outputs > c_header`](#outputs_c_header)
+    - [2.2.1. Property `Settings > outputs > c_header > extension`](#outputs_c_header_extension)
+  - [2.3. Property `Settings > outputs > enable`](#outputs_enable)
+    - [2.3.1. Settings > outputs > enable > OutputKind](#outputs_enable_items)
 
 **Title:** Settings
 
@@ -87,12 +89,36 @@
 | **Additional properties** | Any type allowed      |
 | **Defined in**            | #/$defs/OutputsConfig |
 
-| Property                         | Pattern | Type   | Deprecated | Definition               | Title/Description     |
-| -------------------------------- | ------- | ------ | ---------- | ------------------------ | --------------------- |
-| - [c_header](#outputs_c_header ) | No      | object | No         | In #/$defs/CHeaderConfig | -                     |
-| - [enable](#outputs_enable )     | No      | array  | No         | -                        | The outputs to enable |
+| Property                         | Pattern | Type   | Deprecated | Definition                  | Title/Description     |
+| -------------------------------- | ------- | ------ | ---------- | --------------------------- | --------------------- |
+| - [all](#outputs_all )           | No      | object | No         | In #/$defs/AllOutputsConfig | -                     |
+| - [c_header](#outputs_c_header ) | No      | object | No         | In #/$defs/CHeaderConfig    | -                     |
+| - [enable](#outputs_enable )     | No      | array  | No         | -                           | The outputs to enable |
 
-### <a name="outputs_c_header"></a>2.1. Property `Settings > outputs > c_header`
+### <a name="outputs_all"></a>2.1. Property `Settings > outputs > all`
+
+|                           |                          |
+| ------------------------- | ------------------------ |
+| **Type**                  | `object`                 |
+| **Required**              | No                       |
+| **Additional properties** | Any type allowed         |
+| **Defined in**            | #/$defs/AllOutputsConfig |
+
+| Property                               | Pattern | Type    | Deprecated | Definition | Title/Description                                           |
+| -------------------------------------- | ------- | ------- | ---------- | ---------- | ----------------------------------------------------------- |
+| - [watermark](#outputs_all_watermark ) | No      | boolean | No         | -          | Adds a watermark displaying cgen version to generated files |
+
+#### <a name="outputs_all_watermark"></a>2.1.1. Property `Settings > outputs > all > watermark`
+
+|              |           |
+| ------------ | --------- |
+| **Type**     | `boolean` |
+| **Required** | No        |
+| **Default**  | `true`    |
+
+**Description:** Adds a watermark displaying cgen version to generated files
+
+### <a name="outputs_c_header"></a>2.2. Property `Settings > outputs > c_header`
 
 |                           |                       |
 | ------------------------- | --------------------- |
@@ -105,7 +131,7 @@
 | ------------------------------------------- | ------- | ------ | ---------- | ---------- | ----------------------------------------- |
 | - [extension](#outputs_c_header_extension ) | No      | string | No         | -          | The output extension for the header files |
 
-#### <a name="outputs_c_header_extension"></a>2.1.1. Property `Settings > outputs > c_header > extension`
+#### <a name="outputs_c_header_extension"></a>2.2.1. Property `Settings > outputs > c_header > extension`
 
 |              |          |
 | ------------ | -------- |
@@ -125,7 +151,7 @@
 "h"
 ```
 
-### <a name="outputs_enable"></a>2.2. Property `Settings > outputs > enable`
+### <a name="outputs_enable"></a>2.3. Property `Settings > outputs > enable`
 
 |              |         |
 | ------------ | ------- |
@@ -146,7 +172,7 @@
 | ----------------------------------- | ----------- |
 | [OutputKind](#outputs_enable_items) | -           |
 
-#### <a name="outputs_enable_items"></a>2.2.1. Settings > outputs > enable > OutputKind
+#### <a name="outputs_enable_items"></a>2.3.1. Settings > outputs > enable > OutputKind
 
 |                |                    |
 | -------------- | ------------------ |

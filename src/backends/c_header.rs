@@ -81,7 +81,7 @@ impl CHeader {
     fn add_header_boilerplate(content: String) -> String {
         let hash = XxHash3_128::oneshot(content.as_bytes());
 
-        formatdoc! {"
+        let mut header = formatdoc! {"
             // clang-format off
             // NOLINTBEGIN
 
@@ -96,6 +96,26 @@ impl CHeader {
 
             // clang-format on
             // NOLINTEND
-        ", content, hash}
+        ", content, hash};
+
+        if crate::cfg::Settings::global().outputs.all.watermark {
+            let watermark = super::WATERMARK
+                .iter()
+                .map(|line| format!(" * {}", line))
+                .collect::<Vec<String>>()
+                .join("\n");
+
+            header.insert_str(
+                0,
+                &formatdoc! {"
+                /*
+                {0}
+                 */
+
+                ", watermark},
+            );
+        }
+
+        header
     }
 }

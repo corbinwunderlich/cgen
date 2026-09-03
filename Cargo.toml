@@ -2,6 +2,11 @@
 name = "cgen"
 version = "0.1.0"
 edition = "2024"
+description = "A C/C++ header generator built in Rust"
+readme = "README.md"
+homepage = "https://github.com/corbinwunderlich/cgen"
+repository = "https://github.com/corbinwunderlich/cgen"
+license-file = "LICENSE"
 build = "build.rs"
 
 [dependencies]

@@ -11,6 +11,16 @@
     }
   },
   "$defs": {
+    "AllOutputsConfig": {
+      "type": "object",
+      "properties": {
+        "watermark": {
+          "description": "Adds a watermark displaying cgen version to generated files",
+          "type": "boolean",
+          "default": true
+        }
+      }
+    },
     "CHeaderConfig": {
       "type": "object",
       "properties": {
@@ -63,6 +73,9 @@
     "OutputsConfig": {
       "type": "object",
       "properties": {
+        "all": {
+          "$ref": "#/$defs/AllOutputsConfig"
+        },
         "c_header": {
           "$ref": "#/$defs/CHeaderConfig"
         },
