@@ -87,13 +87,7 @@
               enable = true;
 
               name = "json schema for humans";
-              entry = let
-                entry = pkgs.writeShellScript "json-schema-for-humans" ''
-                  ${pkgs.json-schema-for-humans}/bin/generate-schema-doc config.schema.json CONFIG.md \
-                    --config template_name=md \
-                    --config with_footer=false
-                '';
-              in "${entry}";
+              entry = "${pkgs.json-schema-for-humans}/bin/generate-schema-doc config.schema.json CONFIG.md --config-file jsfh.yaml";
 
               pass_filenames = false;
             };
