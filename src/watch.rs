@@ -27,15 +27,15 @@ pub fn begin(paths: &'static Vec<PathBuf>) -> Result<(), WatchError> {
     }
 
     rx.iter()
-        .filter_map(|event| event.ok())
+        .filter_map(Result::ok)
         .flat_map(|event| event.paths)
         .filter_map(|path| {
             crate::frontends::create_frontend(&path).map(|frontend| (path, frontend))
         })
         .for_each(|(path, frontend)| {
-            println!("Path {:#?} changed, generating...", path);
+            println!("Path {} changed, generating...", path.display());
 
-            crate::process_file(frontend).unwrap();
+            crate::process_file(&frontend).unwrap();
         });
 
     Ok(())

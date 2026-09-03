@@ -14,7 +14,7 @@ use super::SourceRange;
 #[derive(Debug, Deserialize, JsonSchema, SmartDefault)]
 #[serde(default)]
 pub struct ClangConfig {
-    #[default(["c", "cpp", "cc", "cxx", "c++", "m", "mm"].iter().map(|e| e.to_string()).collect())]
+    #[default(["c", "cpp", "cc", "cxx", "c++", "m", "mm"].iter().map(ToString::to_string).collect())]
     /// The extensions which are parsed by Clang
     pub extensions: Vec<String>,
 }
@@ -61,19 +61,19 @@ fn delete_function_body(node: &clang::Entity<'_>, function_range: &mut ops::Rang
     function_range.end = body_range.get_start().get_file_location().offset - 1;
 }
 
-fn find_overlapping_ranges<'r>(
-    ranges: &'r [SourceRange],
-    start: &u32,
-    end: &u32,
-) -> Vec<(usize, &'r SourceRange)> {
+fn find_overlapping_ranges(
+    ranges: &[SourceRange],
+    start: u32,
+    end: u32,
+) -> Vec<(usize, &SourceRange)> {
     ranges
         .iter()
         .enumerate()
-        .filter(|(_, SourceRange { range, .. })| range.start < *end && *start < range.end)
+        .filter(|(_, SourceRange { range, .. })| range.start < end && start < range.end)
         .collect()
 }
 
-fn contains_larger_range(ranges: &[(usize, &SourceRange)], start: &u32, end: &u32) -> bool {
+fn contains_larger_range(ranges: &[(usize, &SourceRange)], start: u32, end: u32) -> bool {
     ranges.iter().any(|(_, SourceRange { range, .. })| {
         let range_length = end - start;
 
@@ -111,7 +111,7 @@ fn range_from_node(ranges: Vec<SourceRange>, node: clang::Entity<'_>) -> Option<
         return None;
     }
 
-    let overlapping_ranges = find_overlapping_ranges(&ranges, &start.offset, &end.offset);
+    let overlapping_ranges = find_overlapping_ranges(&ranges, start.offset, end.offset);
 
     let mut range = start.offset..end.offset + 1;
 
@@ -126,7 +126,7 @@ fn range_from_node(ranges: Vec<SourceRange>, node: clang::Entity<'_>) -> Option<
         return Some(ranges);
     }
 
-    if contains_larger_range(&overlapping_ranges, &start.offset, &end.offset) {
+    if contains_larger_range(&overlapping_ranges, start.offset, end.offset) {
         return Some(ranges);
     }
 
@@ -146,7 +146,7 @@ pub struct LibClang {
 
 impl crate::frontends::Frontend for LibClang {
     fn new(source_path: &Path) -> Self {
-        LibClang {
+        Self {
             source_path: source_path.into(),
         }
     }

@@ -63,7 +63,7 @@ impl crate::backends::Backend for CHeader {
             .trim()
             .to_owned();
 
-        Some(Self::add_header_boilerplate(result))
+        Some(Self::add_header_boilerplate(&result))
     }
 }
 
@@ -78,7 +78,7 @@ impl CHeader {
         source.push_str("\n\n");
     }
 
-    fn add_header_boilerplate(content: String) -> String {
+    fn add_header_boilerplate(content: &str) -> String {
         let hash = XxHash3_128::oneshot(content.as_bytes());
 
         let mut header = formatdoc! {"
@@ -101,7 +101,7 @@ impl CHeader {
         if crate::cfg::Settings::global().outputs.all.watermark {
             let watermark = super::WATERMARK
                 .iter()
-                .map(|line| format!(" * {}", line))
+                .map(|line| format!(" * {line}"))
                 .collect::<Vec<String>>()
                 .join("\n");
 

@@ -75,13 +75,13 @@ pub fn main() -> Result<(), Report> {
                 .build()
                 .filter_map(Result::ok)
                 .filter(|e| e.file_type().is_some_and(|e| e.is_file()))
-                .map(|e| e.into_path())
+                .map(ignore::DirEntry::into_path)
                 .filter(|path| crate::frontends::is_any_allowed_extension(path))
                 .collect()
         })
         .try_for_each(|path| {
             match process_file(
-                crate::frontends::create_frontend(&path).ok_or(CgenError {
+                &crate::frontends::create_frontend(&path).ok_or(CgenError {
                     path: path.clone(),
                     source: CgenErrorKind::DisallowedExtension {
                         extension: path
@@ -113,21 +113,21 @@ pub fn main() -> Result<(), Report> {
     Ok(())
 }
 
-pub fn process_file<F: crate::frontends::Frontend>(frontend: F) -> Result<(), CgenErrorKind> {
+fn write_to_backend<Backend: crate::backends::Backend>(
+    frontend: &impl crate::frontends::Frontend,
+    path: &Path,
+) -> Result<(), CgenErrorKind> {
+    let backend = Backend::new(path);
+
+    backend.write(backend.generate_content(frontend.generate_ranges()?))?;
+
+    Ok(())
+}
+
+pub fn process_file<F: crate::frontends::Frontend>(frontend: &F) -> Result<(), CgenErrorKind> {
     let path = frontend.source_path();
 
-    fn write_to_backend<Backend: crate::backends::Backend>(
-        frontend: &impl crate::frontends::Frontend,
-        path: &Path,
-    ) -> Result<(), CgenErrorKind> {
-        let backend = Backend::new(path);
-
-        backend.write(backend.generate_content(frontend.generate_ranges()?))?;
-
-        Ok(())
-    }
-
-    crate::backends::for_each_backend!(write_to_backend, &frontend, path);
+    crate::backends::for_each_backend!(write_to_backend, frontend, path);
 
     FILES_PROCESSED.fetch_add(1, Ordering::Relaxed);
 
