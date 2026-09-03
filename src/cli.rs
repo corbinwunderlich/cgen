@@ -3,7 +3,6 @@
 use std::{path::PathBuf, sync::OnceLock};
 
 use clap::Parser;
-use clap_verbosity_flag::{InfoLevel, Verbosity};
 
 #[derive(Debug, Parser)]
 #[command(version, about)]
@@ -26,8 +25,6 @@ pub struct Args {
     #[arg(short = 'H', long, default_value_t = false)]
     /// Allow transforming hidden files and directories (off by default)
     pub hidden: bool,
-    #[command(flatten)]
-    pub verbosity: Verbosity<InfoLevel>,
 }
 
 static ARGS: OnceLock<Args> = OnceLock::new();

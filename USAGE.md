@@ -17,10 +17,6 @@ Options:
           Respect .gitignore and .ignore when transforming directories (on by default)
   -H, --hidden
           Allow transforming hidden files and directories (off by default)
-  -v, --verbose...
-          Increase logging verbosity
-  -q, --quiet...
-          Decrease logging verbosity
   -h, --help
           Print help
   -V, --version
