@@ -11,6 +11,59 @@
     }
   },
   "$defs": {
+    "InputsConfig": {
+      "type": "object",
+      "properties": {
+        "clang": {
+          "$ref": "#/$defs/ClangConfig"
+        }
+      }
+    },
+    "ClangConfig": {
+      "type": "object",
+      "properties": {
+        "extensions": {
+          "description": "The extensions which are parsed by Clang",
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [
+            "c",
+            "cpp",
+            "cc",
+            "cxx",
+            "c++",
+            "m",
+            "mm"
+          ]
+        }
+      }
+    },
+    "OutputsConfig": {
+      "type": "object",
+      "properties": {
+        "enable": {
+          "description": "The outputs to enable",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/OutputKind"
+          }
+        },
+        "all": {
+          "$ref": "#/$defs/AllOutputsConfig"
+        },
+        "c_header": {
+          "$ref": "#/$defs/CHeaderConfig"
+        }
+      }
+    },
+    "OutputKind": {
+      "type": "string",
+      "enum": [
+        "c_header"
+      ]
+    },
     "AllOutputsConfig": {
       "type": "object",
       "properties": {
@@ -27,64 +80,11 @@
         "extension": {
           "description": "The output extension for the header files",
           "type": "string",
-          "default": "h",
           "examples": [
             "hpp",
             "h"
-          ]
-        }
-      }
-    },
-    "ClangConfig": {
-      "type": "object",
-      "properties": {
-        "extensions": {
-          "description": "The extensions which are parsed by Clang",
-          "type": "array",
-          "default": [
-            "c",
-            "cpp",
-            "cc",
-            "cxx",
-            "c++",
-            "m",
-            "mm"
           ],
-          "items": {
-            "type": "string"
-          }
-        }
-      }
-    },
-    "InputsConfig": {
-      "type": "object",
-      "properties": {
-        "clang": {
-          "$ref": "#/$defs/ClangConfig"
-        }
-      }
-    },
-    "OutputKind": {
-      "type": "string",
-      "enum": [
-        "c_header"
-      ]
-    },
-    "OutputsConfig": {
-      "type": "object",
-      "properties": {
-        "all": {
-          "$ref": "#/$defs/AllOutputsConfig"
-        },
-        "c_header": {
-          "$ref": "#/$defs/CHeaderConfig"
-        },
-        "enable": {
-          "description": "The outputs to enable",
-          "type": "array",
-          "items": {
-            "$ref": "#/$defs/OutputKind"
-          }
+          "default": "h"
         }
       }
     }
